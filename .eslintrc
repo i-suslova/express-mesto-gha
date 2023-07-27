@@ -1,0 +1,21 @@
+{
+  "extends": "airbnb-base",
+  "rules": {
+
+    "no-underscore-dangle": [
+      "error",
+      {
+        "allowAfterThis": true,
+        "allowAfterThisConstructor": true,
+        "allowFunctionParams": true,
+        "allow": ["_id"]
+      }
+    ],
+    "quotes": ["error", "double"],
+    "no-multiple-empty-lines": ["error", { "max": 4, "maxEOF": 0 }],
+    "consistent-return": "error",
+    "comma-dangle": ["error", "never"],
+    "arrow-body-style": ["error", "as-needed"],
+    "no-console": "off"
+  }
+}
