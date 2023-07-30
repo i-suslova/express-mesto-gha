@@ -3,7 +3,7 @@ const User = require("../models/user");
 const ERROR_CODE = 400;
 const NOT_FOUND_CODE = 404;
 const SERVER_ERROR_CODE = 500;
-
+console.log("11111");
 // получаем всех пользователей
 module.exports.getUsers = (req, res) => {
   User.find({})
@@ -14,8 +14,10 @@ module.exports.getUsers = (req, res) => {
 // получаем пользователя по _id
 module.exports.getUserById = (req, res) => {
   const userId = req.user._id;
+  console.log("Received userId:", userId);
   User.findById(userId)
     .then((user) => {
+      console.log("Found user:", user);
       if (!user) {
         return res
           .status(NOT_FOUND_CODE)

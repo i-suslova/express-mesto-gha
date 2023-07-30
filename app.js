@@ -22,15 +22,15 @@ app.use(bodyParser.json());
 // для приёма веб-страниц внутри POST-запроса
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use((req, res, next) => {
-  const userId = "64c2c6204d894005c5a24d8f";
-  req.user = {
-    _id: userId
 
+app.use((req, res, next) => {
+  req.user = {
+    _id: "64c2c6204d894005c5a24d8f"
   };
 
   next();
 });
+
 
 // подключаем роуты
 app.use("/", require("./routes/users"));
