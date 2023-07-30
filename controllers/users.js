@@ -11,9 +11,9 @@ module.exports.getUsers = (req, res) => {
     .catch(() => res.status(SERVER_ERROR_CODE).send({ message: "На сервере произошла ошибка" }));
 };
 
-// получаем пользователя по идентификатору
+// получаем пользователя по _id
 module.exports.getUserById = (req, res) => {
-  const { userId } = req.params;
+  const userId = req.user._id;
   User.findById(userId)
     .then((user) => {
       if (!user) {
