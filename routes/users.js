@@ -8,18 +8,18 @@ const {
 } = require("../controllers/users");
 
 // роут для получения всех пользователей
-router.get("/users", getUsers);
-
-// роут для получения пользователя по _id
-router.get("/users/:userId", getUserById);
+router.get("/", getUsers);
 
 // роут для создания нового пользователя
-router.post("/users", createUser);
+router.post("/", createUser);
 
 // роут для обновления профиля
-router.patch("/users/me", updateUser);
+router.patch("/me", updateUser);
 
 // роут для обновления аватара
-router.patch("/users/me/avatar", updateAvatar);
+router.patch("/me/avatar", updateAvatar);
+
+// роут для получения пользователя по _id
+router.get("/:userId", getUserById);
 
 module.exports = router;

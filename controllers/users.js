@@ -14,6 +14,8 @@ module.exports.getUsers = (req, res) => {
 // получаем пользователя по _id
 module.exports.getUserById = (req, res) => {
   const userId = req.user._id;
+  // const { userId } = req.params.userId;
+
   console.log("Received userId:", userId);
   User.findById(userId)
     .then((user) => {

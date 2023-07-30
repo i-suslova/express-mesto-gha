@@ -33,7 +33,7 @@ app.use((req, res, next) => {
 
 
 // подключаем роуты
-app.use("/", require("./routes/users"));
+app.use("/users", require("./routes/users"));
 app.use("/", require("./routes/cards"));
 
 // запускаем сервер
