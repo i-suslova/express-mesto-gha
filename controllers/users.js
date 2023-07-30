@@ -13,7 +13,8 @@ module.exports.getUsers = (req, res) => {
 
 // получаем пользователя по идентификатору
 module.exports.getUserById = (req, res) => {
-  User.findById(req.params.userId)
+  const { userId } = req.params;
+  User.findById(userId)
     .then((user) => {
       if (!user) {
         return res
@@ -22,7 +23,10 @@ module.exports.getUserById = (req, res) => {
       }
       return res.status(200).send({ data: user });
     })
-    .catch(() => res.status(SERVER_ERROR_CODE).send({ message: "Произошла 1ошибка" }));
+    .catch((error) => {
+      console.error(error.message);
+      res.status(SERVER_ERROR_CODE).send({ message: "Произошла ошибка при получении пользователя" });
+    });
 };
 
 // создаем нового пользователя
@@ -33,9 +37,9 @@ module.exports.createUser = (req, res) => {
     .then((user) => res.status(201).send({ data: user }))
     .catch((error) => {
       if (error.name === "ValidationError") {
-        res.status(ERROR_CODE).send({ message: "Неверные данные" });
+        res.status(ERROR_CODE).send({ message: "2Неверные данные" });
       } else {
-        res.status(SERVER_ERROR_CODE).send({ message: "Не удалось создать пользователя" });
+        res.status(SERVER_ERROR_CODE).send({ message: "2Не удалось создать пользователя" });
       }
     });
 };
