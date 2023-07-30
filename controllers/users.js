@@ -22,7 +22,7 @@ module.exports.getUserById = (req, res) => {
       }
       return res.status(200).send({ data: user });
     })
-    .catch(() => res.status(SERVER_ERROR_CODE).send({ message: "Произошла ошибка" }));
+    .catch(() => res.status(SERVER_ERROR_CODE).send({ message: "Произошла 1ошибка" }));
 };
 
 // создаем нового пользователя
