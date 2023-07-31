@@ -29,6 +29,7 @@ module.exports.getUserById = (req, res) => {
     })
     .catch((error) => {
       console.error(error.message);
+
       res.status(SERVER_ERROR_CODE).send({ message: "Произошла ошибка при получении пользователя" });
     });
 };
@@ -68,8 +69,6 @@ module.exports.updateUser = (req, res) => {
       return res.status(SERVER_ERROR_CODE).send({ message: "Произошла ошибка при обновлении профиля" });
     });
 };
-
-
 
 
 // обновляем аватар пользователя

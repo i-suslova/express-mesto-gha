@@ -30,16 +30,7 @@ app.use((req, res, next) => {
 
   next();
 });
-// app.use((req, res, next) => {
-//   // Получаем _id из параметров запроса
-//   const { userId } = req.params;
 
-//   req.user = {
-//     _id: userId
-//   };
-
-//   next();
-// });
 
 
 // подключаем роуты
