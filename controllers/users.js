@@ -11,13 +11,9 @@ module.exports.getUsers = (req, res) => {
     .catch(() => res.status(SERVER_ERROR_CODE).send({ message: "На сервере произошла ошибка" }));
 };
 
-// получаем пользователя по _id
 module.exports.getUserById = (req, res) => {
-  // const userId = req.user._id;
-
-
-  console.log("Received userId:", req.user._id);
-  User.findById(req.user._id)
+  console.log("userId:", req.params.userId);
+  User.findById(req.params.userId)
     .then((user) => {
       console.log("Found user:", user);
       if (!user) {
@@ -29,8 +25,6 @@ module.exports.getUserById = (req, res) => {
     })
     .catch((error) => {
       console.error(error.message);
-
-
       res.status(SERVER_ERROR_CODE).send({ message: "Произошла ошибка при получении пользователя" });
     });
 };
