@@ -23,6 +23,14 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use((req, res, next) => {
+  const userUrl = req.params.userId;
+  req.user = {
+    _id: userUrl
+  };
+  next();
+});
+
+app.use((req, res, next) => {
   req.user = {
     _id: "64c7583ecdff7c9cf3dc78d6"
   };
@@ -34,13 +42,13 @@ app.use((req, res, next) => {
 app.use("/", require("./routes/users"));
 app.use("/", require("./routes/cards"));
 
-// несуществующий роут
-const NOT_FOUND_CODE = 404;
-app.use("/", (req, res) => {
-  res.status(NOT_FOUND_CODE).send({
-    message: "Страница не найдена"
-  });
-});
+// // несуществующий роут
+// const NOT_FOUND_CODE = 404;
+// app.use("/", (req, res) => {
+//   res.status(NOT_FOUND_CODE).send({
+//     message: "Страница не найдена"
+//   });
+// });
 
 // запускаем сервер
 app.listen(PORT, () => {
