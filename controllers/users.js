@@ -12,13 +12,11 @@ module.exports.getUsers = (req, res) => {
 };
 
 module.exports.getUserById = (req, res) => {
-  console.log("userId:", req.params.userId);
   User.findById(req.params.userId)
     .then((user) => {
-      console.log("Found user:", user);
       if (!user) {
         return res
-          .status(NOT_FOUND_CODE)
+          .status(ERROR_CODE)
           .send({ message: "Пользователь не найден" });
       }
       return res.status(200).send({ data: user });
@@ -28,7 +26,6 @@ module.exports.getUserById = (req, res) => {
       res.status(SERVER_ERROR_CODE).send({ message: "Произошла ошибка при получении пользователя" });
     });
 };
-
 
 // создаем нового пользователя
 module.exports.createUser = (req, res) => {
