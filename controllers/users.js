@@ -3,7 +3,7 @@ const User = require("../models/user");
 const ERROR_CODE = 400;
 const NOT_FOUND_CODE = 404;
 const SERVER_ERROR_CODE = 500;
-console.log("11111");
+
 // получаем всех пользователей
 module.exports.getUsers = (req, res) => {
   User.find({})
@@ -41,9 +41,10 @@ module.exports.createUser = (req, res) => {
     .then((user) => res.status(201).send({ data: user }))
     .catch((error) => {
       if (error.name === "ValidationError") {
-        res.status(ERROR_CODE).send({ message: "2Неверные данные" });
+        res.status(ERROR_CODE).send({ message: "Неверные данные" });
       } else {
-        res.status(SERVER_ERROR_CODE).send({ message: "2Не удалось создать пользователя" });
+        console.error(error);
+        res.status(SERVER_ERROR_CODE).send({ message: "Не удалось создать пользователя" });
       }
     });
 };
@@ -51,18 +52,25 @@ module.exports.createUser = (req, res) => {
 // обновляем сведения о пользователе
 module.exports.updateUser = (req, res) => {
   const { name, about } = req.body;
+
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true })
-    .then((user) => res.status(200).send({ data: user }))
-    .catch((err) => {
-      if (err.name === "ValidationError") {
-        res.status(ERROR_CODE).send({ message: "Неверные данные" });
-      } else {
-        res
-          .status(SERVER_ERROR_CODE)
-          .send({ message: "Произошла ошибка при обновлении профиля" });
+    .then((updatedUser) => {
+      if (!updatedUser) {
+        return res.status(NOT_FOUND_CODE).send({ message: "Пользователь не найден" });
       }
+      return res.status(200).send({ data: updatedUser });
+    })
+    .catch((error) => {
+      if (error.name === "ValidationError") {
+        return res.status(ERROR_CODE).send({ message: "Неверные данные" });
+      }
+      console.error(error);
+      return res.status(SERVER_ERROR_CODE).send({ message: "Произошла ошибка при обновлении профиля" });
     });
 };
+
+
+
 
 // обновляем аватар пользователя
 module.exports.updateAvatar = (req, res) => {

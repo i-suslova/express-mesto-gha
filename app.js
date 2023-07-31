@@ -25,15 +25,25 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use((req, res, next) => {
   req.user = {
-    _id: "64c2c6204d894005c5a24d8f"
+    _id: "64c7583ecdff7c9cf3dc78d6"
   };
 
   next();
 });
+// app.use((req, res, next) => {
+//   // Получаем _id из параметров запроса
+//   const { userId } = req.params;
+
+//   req.user = {
+//     _id: userId
+//   };
+
+//   next();
+// });
 
 
 // подключаем роуты
-app.use("/users", require("./routes/users"));
+app.use("/", require("./routes/users"));
 app.use("/", require("./routes/cards"));
 
 // запускаем сервер
