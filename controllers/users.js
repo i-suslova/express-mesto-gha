@@ -11,14 +11,21 @@ module.exports.getUsers = (req, res) => {
     .catch(() => res.status(SERVER_ERROR_CODE).send({ message: "На сервере произошла ошибка" }));
 };
 
+// получаем пользователя по id
 module.exports.getUserById = (req, res) => {
-  User.findById(req.params.userId)
+  const userId = req.user._id;
+
+  console.log("ID:", req.params.userId);
+
+  User.findById(userId)
     .then((user) => {
       if (!user) {
+        console.log("Пользователь не найден по ID:", req.params.userId);
         return res
           .status(NOT_FOUND_CODE)
           .send({ message: "Пользователь не найден" });
       }
+      console.log("Пользователь найден:", user);
       return res.status(200).send({ data: user });
     })
     .catch((error) => {
