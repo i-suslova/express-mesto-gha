@@ -21,15 +21,13 @@ module.exports.getUsers = (req, res) => {
         .send({ message: "На сервере произошла ошибка" });
     });
 };
-
-// получаем пользователя по id
 // получаем пользователя по id
 module.exports.getUserById = (req, res) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (!user) {
         return res
-          .status(ERROR_CODE)
+          .status(NOT_FOUND_CODE)
           .send({ message: "Пользователь по указанному _id не найден" });
       }
       return res.status(200).send({ data: user });
@@ -41,7 +39,6 @@ module.exports.getUserById = (req, res) => {
         .send({ message: "Произошла ошибка при получении пользователя" });
     });
 };
-
 
 // создаем нового пользователя
 module.exports.createUser = (req, res) => {
@@ -63,7 +60,7 @@ module.exports.updateUser = (req, res) => {
     .then((user) => {
       if (!user) {
         return res
-          .status(ERROR_CODE)
+          .status(NOT_FOUND_CODE)
           .send({ message: "Пользователь по указанному _id не найден" });
       }
       return res.status(200).send({ data: user });
@@ -86,7 +83,7 @@ module.exports.updateAvatar = (req, res) => {
     .then((user) => {
       if (!user) {
         return res
-          .status(ERROR_CODE)
+          .status(NOT_FOUND_CODE)
           .send({ message: "Пользователь по указанному _id не найден" });
       }
       return res.status(200).send({ data: user });
