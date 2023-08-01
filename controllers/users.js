@@ -22,7 +22,6 @@ module.exports.getUsers = (req, res) => {
     });
 };
 // получаем пользователя по id
-
 module.exports.getUserById = (req, res) => {
   const { userId } = req.params;
 
@@ -33,13 +32,20 @@ module.exports.getUserById = (req, res) => {
           .status(NOT_FOUND_CODE)
           .send({ message: "Пользователь по указанному _id не найден" });
       }
+
+      // проверяем, что userId не пуст и является строкой
+      if (typeof userId !== "string" || userId.length === 0) {
+        return res
+          .status(SERVER_ERROR_CODE)
+          .send({ message: "Некорректный идентификатор пользователя" });
+      }
       return res.status(200).send({ data: user });
     })
     .catch((error) => {
       console.error(error);
       res
         .status(SERVER_ERROR_CODE)
-        .send({ message: "Произошла ошибка при получении пользовател я" });
+        .send({ message: "Произошла ошибка при получении пользователя" });
     });
 };
 
