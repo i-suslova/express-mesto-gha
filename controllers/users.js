@@ -66,13 +66,13 @@ module.exports.updateUser = (req, res) => {
       return res.status(200).send({ data: user });
     })
     .catch((error) => {
+      if (error.name === "ValidationError") {
+        return res.status(ERROR_CODE).send({ message: "Ошибка: Некорректные данные." });
+      }
       console.error(error);
-      res
-        .status(SERVER_ERROR_CODE)
-        .send({ message: "Произошла ошибка при обновлении профиля" });
+      return res.status(SERVER_ERROR_CODE).send({ message: "Произошла ошибка при обновлении профиля" });
     });
 };
-
 // обновляем аватар пользователя
 module.exports.updateAvatar = (req, res) => {
   const { avatar } = req.body;
@@ -89,7 +89,10 @@ module.exports.updateAvatar = (req, res) => {
       return res.status(200).send({ data: user });
     })
     .catch((error) => {
+      if (error.name === "ValidationError") {
+        return res.status(ERROR_CODE).send({ message: "Ошибка: Некорректные данные." });
+      }
       console.error(error);
-      res.status(SERVER_ERROR_CODE).send({ message: "Не удалось обновить аватар" });
+      return res.status(SERVER_ERROR_CODE).send({ message: "Не удалось обновить аватар" });
     });
 };
