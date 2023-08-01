@@ -9,12 +9,11 @@ module.exports.getUsers = (req, res) => {
   User.find({})
     .then((users) => {
       if (users.length === 0) {
-        res
+        return res
           .status(NOT_FOUND_CODE)
           .send({ message: "Пользователи на найдены." });
-        return;
       }
-      res.status(200).send({ data: users });
+      return res.status(200).send({ data: users });
     })
     .catch(() => {
       res
@@ -25,9 +24,6 @@ module.exports.getUsers = (req, res) => {
 
 // получаем пользователя по id
 module.exports.getUserById = (req, res) => {
-  // const UserId = req.params.userId;
-
-  // User.findById(UserId)
   User.findById(req.params.userId)
     .then((user) => {
       if (!user) {
@@ -38,7 +34,7 @@ module.exports.getUserById = (req, res) => {
       return res.status(200).send({ data: user });
     })
     .catch((error) => {
-      console.error(error.message);
+      console.error(error);
       res
         .status(SERVER_ERROR_CODE)
         .send({ message: "Произошла ошибка при получении пользователя" });
@@ -64,9 +60,12 @@ module.exports.createUser = (req, res) => {
 };
 
 // обновляем сведения о пользователе
+// eslint-disable-next-line consistent-return
 module.exports.updateUser = (req, res) => {
   const { name, about } = req.body;
-
+  if (!name) {
+    return res.status(ERROR_CODE).send({ message: "Поле 'name' обязательно для заполнения" });
+  }
   // User.findByIdAndUpdate(req.user._id, { name, about }, { new: true })
   User.findByIdAndUpdate(req.user._id, { name, about })
     .then((updatedUser) => {

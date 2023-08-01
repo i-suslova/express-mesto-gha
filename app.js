@@ -34,13 +34,9 @@ app.use((req, res, next) => {
 app.use("/", require("./routes/users"));
 app.use("/", require("./routes/cards"));
 
-// // несуществующий роут
-// const NOT_FOUND_CODE = 404;
-// app.use("/", (req, res) => {
-//   res.status(NOT_FOUND_CODE).send({
-//     message: "Страница не найдена"
-//   });
-// });
+app.use((req, res) => {
+  res.status(404).send({ message: "Запрашиваемый ресурс не найден" });
+});
 
 // запускаем сервер
 app.listen(PORT, () => {
