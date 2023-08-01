@@ -22,8 +22,11 @@ module.exports.getUsers = (req, res) => {
     });
 };
 // получаем пользователя по id
+
 module.exports.getUserById = (req, res) => {
-  User.findById(req.params.userId)
+  const { userId } = req.params;
+
+  User.findById(userId)
     .then((user) => {
       if (!user) {
         return res
