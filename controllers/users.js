@@ -64,9 +64,9 @@ module.exports.updateUser = (req, res) => {
   }
 
   // длина поля "about"
-  if (about && (about.length < 2 || about.length > 300)) {
+  if (about && (about.length < 2 || about.length > 30)) {
     res.status(ERROR_CODE).send({
-      message: "Ошибка: Длина поля about должна быть от 2 до 300 символов."
+      message: "Ошибка: Длина поля about должна быть от 2 до 30 символов."
     });
   }
 
