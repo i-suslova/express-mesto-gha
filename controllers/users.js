@@ -73,6 +73,7 @@ module.exports.updateUser = (req, res) => {
       return res.status(SERVER_ERROR_CODE).send({ message: "Произошла ошибка при обновлении профиля" });
     });
 };
+
 // обновляем аватар пользователя
 module.exports.updateAvatar = (req, res) => {
   const { avatar } = req.body;
