@@ -23,14 +23,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use((req, res, next) => {
-  const userUrl = req.params.userId;
-  req.user = {
-    _id: userUrl
-  };
-  next();
-});
-
-app.use((req, res, next) => {
   req.user = {
     _id: "64c7583ecdff7c9cf3dc78d6"
   };
