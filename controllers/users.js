@@ -39,7 +39,7 @@ module.exports.getUserById = (req, res) => {
       console.error(error);
       res
         .status(SERVER_ERROR_CODE)
-        .send({ message: "Произошла ошибка при получении пользователя" });
+        .send({ message: "Произошла ошибка при получении пользовател я" });
     });
 };
 
