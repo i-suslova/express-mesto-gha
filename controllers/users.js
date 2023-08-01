@@ -1,3 +1,5 @@
+/* eslint-disable consistent-return */
+const mongoose = require("mongoose");
 const User = require("../models/user");
 
 const ERROR_CODE = 400;
@@ -25,6 +27,13 @@ module.exports.getUsers = (req, res) => {
 module.exports.getUserById = (req, res) => {
   const { userId } = req.params;
 
+  // проверка присутствия userId в базе данных
+  if (!mongoose.isValidObjectId(userId)) {
+    return res
+      .status(SERVER_ERROR_CODE)
+      .send({ message: "Отсутствует в базе данных" });
+  }
+
   User.findById(userId)
     .then((user) => {
       if (!user) {
@@ -33,12 +42,6 @@ module.exports.getUserById = (req, res) => {
           .send({ message: "Пользователь по указанному _id не найден" });
       }
 
-      // проверяем, что userId не пуст и является строкой
-      if (typeof userId !== "string" || userId.length === 0) {
-        return res
-          .status(SERVER_ERROR_CODE)
-          .send({ message: "Некорректный идентификатор пользователя" });
-      }
       return res.status(200).send({ data: user });
     })
     .catch((error) => {
