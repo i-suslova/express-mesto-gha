@@ -56,6 +56,20 @@ module.exports.createUser = (req, res) => {
 module.exports.updateUser = (req, res) => {
   const { name, about } = req.body;
 
+  // длина поля "name"
+  if (name && (name.length < 2 || name.length > 30)) {
+    res.status(ERROR_CODE).send({
+      message: "Ошибка: Длина поля name должна быть от 2 до 30 символов."
+    });
+  }
+
+  // длина поля "about"
+  if (about && (about.length < 2 || about.length > 300)) {
+    res.status(ERROR_CODE).send({
+      message: "Ошибка: Длина поля about должна быть от 2 до 300 символов."
+    });
+  }
+
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true })
     .then((user) => {
       if (!user) {
@@ -67,10 +81,14 @@ module.exports.updateUser = (req, res) => {
     })
     .catch((error) => {
       if (error.name === "ValidationError") {
-        return res.status(ERROR_CODE).send({ message: "Ошибка: Некорректные данные." });
+        return res
+          .status(ERROR_CODE)
+          .send({ message: "Ошибка: Некорректные данные." });
       }
       console.error(error);
-      return res.status(SERVER_ERROR_CODE).send({ message: "Произошла ошибка при обновлении профиля" });
+      return res
+        .status(SERVER_ERROR_CODE)
+        .send({ message: "Произошла ошибка при обновлении профиля" });
     });
 };
 
@@ -91,9 +109,13 @@ module.exports.updateAvatar = (req, res) => {
     })
     .catch((error) => {
       if (error.name === "ValidationError") {
-        return res.status(ERROR_CODE).send({ message: "Ошибка: Некорректные данные." });
+        return res
+          .status(ERROR_CODE)
+          .send({ message: "Ошибка: Некорректные данные." });
       }
       console.error(error);
-      return res.status(SERVER_ERROR_CODE).send({ message: "Не удалось обновить аватар" });
+      return res
+        .status(SERVER_ERROR_CODE)
+        .send({ message: "Не удалось обновить аватар" });
     });
 };
