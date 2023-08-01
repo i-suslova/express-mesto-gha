@@ -23,23 +23,25 @@ module.exports.getUsers = (req, res) => {
 };
 
 // получаем пользователя по id
+// получаем пользователя по id
 module.exports.getUserById = (req, res) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (!user) {
         return res
-          .status(NOT_FOUND_CODE)
-          .send({ message: "Пользователь не найден" });
+          .status(ERROR_CODE)
+          .send({ message: "Пользователь по указанному _id не найден" });
       }
       return res.status(200).send({ data: user });
     })
     .catch((error) => {
       console.error(error);
       res
-        .status(NOT_FOUND_CODE)
-        .send({ message: "Пользователь по указанному _id не найден" });
+        .status(SERVER_ERROR_CODE)
+        .send({ message: "Произошла ошибка при получении пользователя" });
     });
 };
+
 
 // создаем нового пользователя
 module.exports.createUser = (req, res) => {
@@ -61,8 +63,8 @@ module.exports.updateUser = (req, res) => {
     .then((user) => {
       if (!user) {
         return res
-          .status(NOT_FOUND_CODE)
-          .send({ message: "Пользователь не найден" });
+          .status(ERROR_CODE)
+          .send({ message: "Пользователь по указанному _id не найден" });
       }
       return res.status(200).send({ data: user });
     })
@@ -84,8 +86,8 @@ module.exports.updateAvatar = (req, res) => {
     .then((user) => {
       if (!user) {
         return res
-          .status(NOT_FOUND_CODE)
-          .send({ message: "Пользователь не найден" });
+          .status(ERROR_CODE)
+          .send({ message: "Пользователь по указанному _id не найден" });
       }
       return res.status(200).send({ data: user });
     })
