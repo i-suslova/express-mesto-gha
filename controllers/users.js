@@ -64,13 +64,14 @@ module.exports.updateUser = (req, res) => {
   const { name, about } = req.body;
 
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true })
-    .then((updatedUser) => {
-      if (!updatedUser) {
+    // .then((updatedUser) => {
+    .then((user) => {
+      if (!user) {
         return res
           .status(NOT_FOUND_CODE)
           .send({ message: "Пользователь не найден" });
       }
-      return res.status(200).send({ data: updatedUser });
+      return res.status(200).send({ data: user });
     })
     .catch((error) => {
       if (error.name === "ValidationError") {
