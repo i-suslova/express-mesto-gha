@@ -60,14 +60,10 @@ module.exports.createUser = (req, res) => {
 };
 
 // обновляем сведения о пользователе
-// eslint-disable-next-line consistent-return
 module.exports.updateUser = (req, res) => {
   const { name, about } = req.body;
-  if (!name) {
-    return res.status(ERROR_CODE).send({ message: "Поле 'name' обязательно для заполнения" });
-  }
-  // User.findByIdAndUpdate(req.user._id, { name, about }, { new: true })
-  User.findByIdAndUpdate(req.user._id, { name, about })
+
+  User.findByIdAndUpdate(req.user._id, { name, about }, { new: true })
     .then((updatedUser) => {
       if (!updatedUser) {
         return res
@@ -93,8 +89,7 @@ module.exports.updateAvatar = (req, res) => {
   if (!avatar) {
     res.status(ERROR_CODE).send({ message: "Отсутствуют данные об аватаре" });
   }
-  // User.findByIdAndUpdate(req.user._id, { avatar }, { new: true })
-  User.findByIdAndUpdate(req.user._id, { avatar })
+  User.findByIdAndUpdate(req.user._id, { avatar }, { new: true })
     .then((user) => {
       if (!user) {
         return res
