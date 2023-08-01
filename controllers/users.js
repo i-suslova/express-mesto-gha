@@ -11,7 +11,7 @@ module.exports.getUsers = (req, res) => {
       if (users.length === 0) {
         return res
           .status(NOT_FOUND_CODE)
-          .send({ message: "Пользователи на найдены." });
+          .send({ message: "Пользователи не найдены." });
       }
       return res.status(200).send({ data: users });
     })
@@ -35,14 +35,9 @@ module.exports.getUserById = (req, res) => {
     })
     .catch((error) => {
       console.error(error);
-      if (error.name === "CastError") {
-        return res
-          .status(NOT_FOUND_CODE)
-          .send({ message: "Пользователь не найден" });
-      }
-      return res
-        .status(SERVER_ERROR_CODE)
-        .send({ message: "Произошла ошибка при получении пользователя" });
+      res
+        .status(NOT_FOUND_CODE)
+        .send({ message: "Пользователь по указанному _id не найден" });
     });
 };
 
@@ -53,14 +48,8 @@ module.exports.createUser = (req, res) => {
   User.create({ name, about, avatar })
     .then((user) => res.status(201).send({ data: user }))
     .catch((error) => {
-      if (error.name === "ValidationError") {
-        res.status(ERROR_CODE).send({ message: "Неверные данные" });
-      } else {
-        console.error(error);
-        res
-          .status(SERVER_ERROR_CODE)
-          .send({ message: "Не удалось создать пользователя" });
-      }
+      console.error(error);
+      res.status(ERROR_CODE).send({ message: "Неверные данные" });
     });
 };
 
@@ -69,7 +58,6 @@ module.exports.updateUser = (req, res) => {
   const { name, about } = req.body;
 
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true })
-    // .then((updatedUser) => {
     .then((user) => {
       if (!user) {
         return res
@@ -79,11 +67,8 @@ module.exports.updateUser = (req, res) => {
       return res.status(200).send({ data: user });
     })
     .catch((error) => {
-      if (error.name === "ValidationError") {
-        return res.status(ERROR_CODE).send({ message: "Неверные данные" });
-      }
       console.error(error);
-      return res
+      res
         .status(SERVER_ERROR_CODE)
         .send({ message: "Произошла ошибка при обновлении профиля" });
     });
@@ -102,11 +87,10 @@ module.exports.updateAvatar = (req, res) => {
           .status(NOT_FOUND_CODE)
           .send({ message: "Пользователь не найден" });
       }
-      return res.status(201).send({ data: user });
+      return res.status(200).send({ data: user });
     })
-    .catch(() => {
-      res
-        .status(SERVER_ERROR_CODE)
-        .send({ message: "Не удалось обновить аватар" });
+    .catch((error) => {
+      console.error(error);
+      res.status(SERVER_ERROR_CODE).send({ message: "Не удалось обновить аватар" });
     });
 };
