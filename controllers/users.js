@@ -30,13 +30,13 @@ module.exports.getUserById = (req, res) => {
       if (!user) {
         return res
           .status(NOT_FOUND_CODE)
-          .send({ message: "Пользователь по указанному _id не найден" });
+          .send({ message: "Пользователь не существует" });
       }
 
       return res.status(200).send({ data: user });
     })
     .catch((error) => {
-      if (error.name === "ValidationError") {
+      if (error.name === "CastError") {
         return res
           .status(ERROR_CODE)
           .send({ message: "Ошибка: Некорректные данные." });

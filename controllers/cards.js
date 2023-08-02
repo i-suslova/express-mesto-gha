@@ -7,7 +7,9 @@ const SERVER_ERROR_CODE = 500;
 module.exports.getAllCards = (req, res) => {
   Card.find({})
     .then((cards) => res.status(200).send(cards))
-    .catch(() => res.status(SERVER_ERROR_CODE).send({ message: "Ошибка при получении списка карточек" }));
+    .catch(() => res
+      .status(SERVER_ERROR_CODE)
+      .send({ message: "Ошибка при получении списка карточек" }));
 };
 
 module.exports.createCard = (req, res) => {
@@ -46,7 +48,8 @@ module.exports.deleteCard = (req, res) => {
 module.exports.likeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
-    { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
+    // добавить _id в массив, если его там нет
+    { $addToSet: { likes: req.user._id } },
     { new: true }
   )
     .then((card) => {
@@ -67,7 +70,8 @@ module.exports.likeCard = (req, res) => {
 module.exports.dislikeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
-    { $pull: { likes: req.user._id } }, // убрать _id из массива
+    // убрать _id из массива
+    { $pull: { likes: req.user._id } },
     { new: true }
   )
     .then((card) => {
