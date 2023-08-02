@@ -4,6 +4,7 @@ const ERROR_CODE = 400;
 const NOT_FOUND_CODE = 404;
 const SERVER_ERROR_CODE = 500;
 
+// получаем список карточек
 module.exports.getAllCards = (req, res) => {
   Card.find({})
     .then((cards) => res.status(200).send(cards))
@@ -12,6 +13,7 @@ module.exports.getAllCards = (req, res) => {
       .send({ message: "Ошибка при получении списка карточек" }));
 };
 
+// добавляем карточку
 module.exports.createCard = (req, res) => {
   const { name, link } = req.body;
 
@@ -28,6 +30,7 @@ module.exports.createCard = (req, res) => {
     });
 };
 
+// удаляем карточку
 module.exports.deleteCard = (req, res) => {
   Card.findByIdAndDelete(req.params.cardId)
     .then((card) => {
@@ -38,13 +41,20 @@ module.exports.deleteCard = (req, res) => {
       }
       return res.status(200).send({ message: "Карточка успешно удалена" });
     })
-    .catch(() => {
-      res
+    .catch((error) => {
+      if (error.name === "CastError") {
+        return res
+          .status(ERROR_CODE)
+          .send({ message: "Ошибка: Некорректные данные." });
+      }
+      console.error(error);
+      return res
         .status(SERVER_ERROR_CODE)
-        .send({ message: "На сервере произошла ошибка" });
+        .send({ message: "Произошла ошибка при получении данных" });
     });
 };
 
+// ставим лайк
 module.exports.likeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
@@ -60,13 +70,20 @@ module.exports.likeCard = (req, res) => {
       }
       return res.status(200).send(card);
     })
-    .catch(() => {
-      res
+    .catch((error) => {
+      if (error.name === "CastError") {
+        return res
+          .status(ERROR_CODE)
+          .send({ message: "Ошибка: Некорректные данные." });
+      }
+      console.error(error);
+      return res
         .status(SERVER_ERROR_CODE)
-        .send({ message: "Ошибка при обновлении карточки" });
+        .send({ message: "Произошла ошибка при получении данных" });
     });
 };
 
+// удаляем лайк
 module.exports.dislikeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
@@ -82,9 +99,15 @@ module.exports.dislikeCard = (req, res) => {
       }
       return res.status(200).send(card);
     })
-    .catch(() => {
-      res
+    .catch((error) => {
+      if (error.name === "CastError") {
+        return res
+          .status(ERROR_CODE)
+          .send({ message: "Ошибка: Некорректные данные." });
+      }
+      console.error(error);
+      return res
         .status(SERVER_ERROR_CODE)
-        .send({ message: "Ошибка при обновлении карточки" });
+        .send({ message: "Произошла ошибка при получении данных" });
     });
 };

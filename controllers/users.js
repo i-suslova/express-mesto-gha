@@ -21,6 +21,7 @@ module.exports.getUsers = (req, res) => {
         .send({ message: "На сервере произошла ошибка" });
     });
 };
+
 // получаем пользователя по id
 module.exports.getUserById = (req, res) => {
   const { userId } = req.params;
@@ -44,7 +45,7 @@ module.exports.getUserById = (req, res) => {
       console.error(error);
       return res
         .status(SERVER_ERROR_CODE)
-        .send({ message: "Произошла ошибка при получении пользователя" });
+        .send({ message: "Произошла ошибка при получении данных" });
     });
 };
 
