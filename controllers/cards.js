@@ -1,6 +1,7 @@
 const Card = require('../models/card');
 
 const SUCCESS_CODE = 200;
+const CREATED_CODE = 201;
 const ERROR_CODE = 400;
 const NOT_FOUND_CODE = 404;
 const SERVER_ERROR_CODE = 500;
@@ -18,8 +19,8 @@ module.exports.getAllCards = (req, res) => {
 module.exports.createCard = (req, res) => {
   const { name, link } = req.body;
 
-  Card.create({ name, link, owner: req.user._id }, { runValidators: true })
-    .then((card) => res.status(SUCCESS_CODE).send(card))
+  Card.create({ name, link, owner: req.user._id })
+    .then((card) => res.status(CREATED_CODE).send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(ERROR_CODE).send({ message: 'Неверные данные' });
