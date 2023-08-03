@@ -1,5 +1,7 @@
-const User = require("../models/user");
+const User = require('../models/user');
 
+const SUCCESS_CODE = 200;
+const CREATED_CODE = 201;
 const ERROR_CODE = 400;
 const NOT_FOUND_CODE = 404;
 const SERVER_ERROR_CODE = 500;
@@ -7,18 +9,11 @@ const SERVER_ERROR_CODE = 500;
 // получаем всех пользователей
 module.exports.getUsers = (req, res) => {
   User.find({})
-    .then((users) => {
-      if (users.length === 0) {
-        return res
-          .status(NOT_FOUND_CODE)
-          .send({ message: "Пользователи не найдены." });
-      }
-      return res.status(200).send({ data: users });
-    })
+    .then((users) => res.status(SUCCESS_CODE).send({ data: users }))
     .catch(() => {
       res
         .status(SERVER_ERROR_CODE)
-        .send({ message: "На сервере произошла ошибка" });
+        .send({ message: 'На сервере произошла ошибка' });
     });
 };
 
@@ -31,21 +26,20 @@ module.exports.getUserById = (req, res) => {
       if (!user) {
         return res
           .status(NOT_FOUND_CODE)
-          .send({ message: "Пользователь не существует" });
+          .send({ message: 'Пользователь не существует' });
       }
 
-      return res.status(200).send({ data: user });
+      return res.status(SUCCESS_CODE).send({ data: user });
     })
     .catch((error) => {
-      if (error.name === "CastError") {
+      if (error.name === 'CastError') {
         return res
           .status(ERROR_CODE)
-          .send({ message: "Ошибка: Некорректные данные." });
+          .send({ message: 'Ошибка: Некорректные данные.' });
       }
-      console.error(error);
       return res
         .status(SERVER_ERROR_CODE)
-        .send({ message: "Произошла ошибка при получении данных" });
+        .send({ message: 'Произошла ошибка при получении данных' });
     });
 };
 
@@ -54,50 +48,33 @@ module.exports.createUser = (req, res) => {
   const { name, about, avatar } = req.body;
 
   User.create({ name, about, avatar })
-    .then((user) => res.status(201).send({ data: user }))
-    .catch((error) => {
-      console.error(error);
-      res.status(ERROR_CODE).send({ message: "Неверные данные" });
+    .then((user) => res.status(CREATED_CODE).send({ data: user }))
+    .catch(() => {
+      res.status(ERROR_CODE).send({ message: 'Неверные данные' });
     });
 };
 
 // обновляем сведения о пользователе
 module.exports.updateUser = (req, res) => {
   const { name, about } = req.body;
-
-  // длина поля "name"
-  if (name && (name.length < 2 || name.length > 30)) {
-    res.status(ERROR_CODE).send({
-      message: "Ошибка: Длина поля name должна быть от 2 до 30 символов."
-    });
-  }
-
-  // длина поля "about"
-  if (about && (about.length < 2 || about.length > 30)) {
-    res.status(ERROR_CODE).send({
-      message: "Ошибка: Длина поля about должна быть от 2 до 30 символов."
-    });
-  }
-
-  User.findByIdAndUpdate(req.user._id, { name, about }, { new: true })
+  User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
         return res
           .status(NOT_FOUND_CODE)
-          .send({ message: "Пользователь по указанному _id не найден" });
+          .send({ message: 'Пользователь по указанному _id не найден' });
       }
-      return res.status(200).send({ data: user });
+      return res.status(SUCCESS_CODE).send({ data: user });
     })
     .catch((error) => {
-      if (error.name === "ValidationError") {
+      if (error.name === 'ValidationError') {
         return res
           .status(ERROR_CODE)
-          .send({ message: "Ошибка: Некорректные данные." });
+          .send({ message: 'Ошибка: Некорректные данные.' });
       }
-      console.error(error);
       return res
         .status(SERVER_ERROR_CODE)
-        .send({ message: "Произошла ошибка при обновлении профиля" });
+        .send({ message: 'Произошла ошибка при обновлении профиля' });
     });
 };
 
@@ -105,26 +82,25 @@ module.exports.updateUser = (req, res) => {
 module.exports.updateAvatar = (req, res) => {
   const { avatar } = req.body;
   if (!avatar) {
-    res.status(ERROR_CODE).send({ message: "Отсутствуют данные об аватаре" });
+    res.status(ERROR_CODE).send({ message: 'Отсутствуют данные об аватаре' });
   }
-  User.findByIdAndUpdate(req.user._id, { avatar }, { new: true })
+  User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
         return res
           .status(NOT_FOUND_CODE)
-          .send({ message: "Пользователь по указанному _id не найден" });
+          .send({ message: 'Пользователь по указанному _id не найден' });
       }
-      return res.status(200).send({ data: user });
+      return res.status(SUCCESS_CODE).send({ data: user });
     })
     .catch((error) => {
-      if (error.name === "ValidationError") {
+      if (error.name === 'ValidationError') {
         return res
           .status(ERROR_CODE)
-          .send({ message: "Ошибка: Некорректные данные." });
+          .send({ message: 'Ошибка: Некорректные данные.' });
       }
-      console.error(error);
       return res
         .status(SERVER_ERROR_CODE)
-        .send({ message: "Не удалось обновить аватар" });
+        .send({ message: 'Не удалось обновить аватар' });
     });
 };

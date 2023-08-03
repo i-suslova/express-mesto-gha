@@ -1,45 +1,32 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const bodyParser = require("body-parser");
+const express = require('express');
+const mongoose = require('mongoose');
+const router = require('./routes');
 
 const { PORT = 3000 } = process.env;
 
 mongoose
-  .connect("mongodb://localhost:27017/mestodb", {
-    useNewUrlParser: true
-  })
-  .then(() => {
-    console.log("MongoDB запущен");
-  })
-  .catch((error) => {
-    console.error("ошибка в подключения MongoDB", error);
+  .connect('mongodb://localhost:27017/mestodb', {
+    useNewUrlParser: true,
   });
 
 const app = express();
 
 // для собирания JSON-формата
-app.use(bodyParser.json());
-// для приёма веб-страниц внутри POST-запроса
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
+// для обработки данных, отправленных через формы HTML
+app.use(express.urlencoded({ extended: true }));
 
 app.use((req, res, next) => {
   req.user = {
-    _id: "64c8b7c0768785f09e4d48f6"
+    _id: '64c8b7c0768785f09e4d48f6',
   };
-
   next();
 });
 
 // подключаем роуты
-app.use("/", require("./routes/users"));
-app.use("/", require("./routes/cards"));
-
-// несуществующий путь
-app.use("/*", (req, res) => {
-  res.status(404).send({ message: "Запрашиваемый ресурс не найден" });
-});
-
+app.use(router);
 // запускаем сервер
 app.listen(PORT, () => {
-  console.log("Port запущен");
+  // eslint-disable-next-line no-console
+  console.log('Port запущен');
 });

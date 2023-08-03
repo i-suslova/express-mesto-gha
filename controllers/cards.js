@@ -1,5 +1,6 @@
-const Card = require("../models/card");
+const Card = require('../models/card');
 
+const SUCCESS_CODE = 200;
 const ERROR_CODE = 400;
 const NOT_FOUND_CODE = 404;
 const SERVER_ERROR_CODE = 500;
@@ -7,25 +8,25 @@ const SERVER_ERROR_CODE = 500;
 // получаем список карточек
 module.exports.getAllCards = (req, res) => {
   Card.find({})
-    .then((cards) => res.status(200).send(cards))
+    .then((cards) => res.status(SUCCESS_CODE).send(cards))
     .catch(() => res
       .status(SERVER_ERROR_CODE)
-      .send({ message: "Ошибка при получении списка карточек" }));
+      .send({ message: 'Ошибка при получении списка карточек' }));
 };
 
 // добавляем карточку
 module.exports.createCard = (req, res) => {
   const { name, link } = req.body;
 
-  Card.create({ name, link, owner: req.user._id })
-    .then((card) => res.status(201).send(card))
+  Card.create({ name, link, owner: req.user._id }, { runValidators: true })
+    .then((card) => res.status(SUCCESS_CODE).send(card))
     .catch((err) => {
-      if (err.name === "ValidationError") {
-        res.status(ERROR_CODE).send({ message: "Неверные данные" });
+      if (err.name === 'ValidationError') {
+        res.status(ERROR_CODE).send({ message: 'Неверные данные' });
       } else {
         res
           .status(SERVER_ERROR_CODE)
-          .send({ message: "Ошибка при создании карточки" });
+          .send({ message: 'Ошибка при создании карточки' });
       }
     });
 };
@@ -37,20 +38,19 @@ module.exports.deleteCard = (req, res) => {
       if (!card) {
         return res
           .status(NOT_FOUND_CODE)
-          .send({ message: "Карточка с указанным идентификатором не найдена" });
+          .send({ message: 'Карточка с указанным идентификатором не найдена' });
       }
-      return res.status(200).send({ message: "Карточка успешно удалена" });
+      return res.status(SUCCESS_CODE).send({ message: 'Карточка успешно удалена' });
     })
     .catch((error) => {
-      if (error.name === "CastError") {
+      if (error.name === 'CastError') {
         return res
           .status(ERROR_CODE)
-          .send({ message: "Ошибка: Некорректные данные." });
+          .send({ message: 'Ошибка: Некорректные данные.' });
       }
-      console.error(error);
       return res
         .status(SERVER_ERROR_CODE)
-        .send({ message: "Произошла ошибка при получении данных" });
+        .send({ message: 'Произошла ошибка при получении данных' });
     });
 };
 
@@ -60,26 +60,25 @@ module.exports.likeCard = (req, res) => {
     req.params.cardId,
     // добавить _id в массив, если его там нет
     { $addToSet: { likes: req.user._id } },
-    { new: true }
+    { new: true },
   )
     .then((card) => {
       if (!card) {
         return res
           .status(NOT_FOUND_CODE)
-          .send({ message: "Карточка с указанным идентификатором не найдена" });
+          .send({ message: 'Карточка с указанным идентификатором не найдена' });
       }
-      return res.status(200).send(card);
+      return res.status(SUCCESS_CODE).send(card);
     })
     .catch((error) => {
-      if (error.name === "CastError") {
+      if (error.name === 'CastError') {
         return res
           .status(ERROR_CODE)
-          .send({ message: "Ошибка: Некорректные данные." });
+          .send({ message: 'Ошибка: Некорректные данные.' });
       }
-      console.error(error);
       return res
         .status(SERVER_ERROR_CODE)
-        .send({ message: "Произошла ошибка при получении данных" });
+        .send({ message: 'Произошла ошибка при получении данных' });
     });
 };
 
@@ -89,25 +88,24 @@ module.exports.dislikeCard = (req, res) => {
     req.params.cardId,
     // убрать _id из массива
     { $pull: { likes: req.user._id } },
-    { new: true }
+    { new: true },
   )
     .then((card) => {
       if (!card) {
         return res
           .status(NOT_FOUND_CODE)
-          .send({ message: "Карточка с указанным идентификатором не найдена" });
+          .send({ message: 'Карточка с указанным идентификатором не найдена' });
       }
-      return res.status(200).send(card);
+      return res.status(SUCCESS_CODE).send(card);
     })
     .catch((error) => {
-      if (error.name === "CastError") {
+      if (error.name === 'CastError') {
         return res
           .status(ERROR_CODE)
-          .send({ message: "Ошибка: Некорректные данные." });
+          .send({ message: 'Ошибка: Некорректные данные.' });
       }
-      console.error(error);
       return res
         .status(SERVER_ERROR_CODE)
-        .send({ message: "Произошла ошибка при получении данных" });
+        .send({ message: 'Произошла ошибка при получении данных' });
     });
 };
