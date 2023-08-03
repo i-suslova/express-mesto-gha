@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const User = require('../models/user');
 
 const SUCCESS_CODE = 200;
@@ -20,17 +21,15 @@ module.exports.getUsers = (req, res) => {
 // получаем пользователя по id
 module.exports.getUserById = (req, res) => {
   const { userId } = req.params;
-
-  // User.findById(userId)
   User.findById(userId)
     .orFail()
     .then((user) => res.status(SUCCESS_CODE).send({ data: user }))
     .catch((error) => {
-      if (error.name === 'DocumentNotFoundError') {
+      if (error instanceof mongoose.Error.DocumentNotFoundError) {
         return res
           .status(NOT_FOUND_CODE)
           .send({ message: 'Пользователь не существует' });
-      } if (error.name === 'CastError') {
+      } if (error instanceof mongoose.Error.CastError) {
         return res
           .status(ERROR_CODE)
           .send({ message: 'Ошибка: Некорректные данные.' });
@@ -59,18 +58,18 @@ module.exports.updateUser = (req, res) => {
     .orFail()
     .then((user) => res.status(SUCCESS_CODE).send({ data: user }))
     .catch((error) => {
-      if (error.name === 'DocumentNotFoundError') {
+      if (error instanceof mongoose.Error.DocumentNotFoundError) {
         return res
           .status(NOT_FOUND_CODE)
           .send({ message: 'Пользователь по указанному _id не найден' });
-      } if (error.name === 'ValidationError') {
+      } if (error instanceof mongoose.Error.ValidationError) {
         return res
           .status(ERROR_CODE)
           .send({ message: 'Ошибка: Некорректные данные.' });
       }
       return res
         .status(SERVER_ERROR_CODE)
-        .send({ message: 'Не удалось обновить аватар' });
+        .send({ message: 'Не удалось обновить информацию' });
     });
 };
 
@@ -84,11 +83,11 @@ module.exports.updateAvatar = (req, res) => {
     .orFail()
     .then((user) => res.status(SUCCESS_CODE).send({ data: user }))
     .catch((error) => {
-      if (error.name === 'DocumentNotFoundError') {
+      if (error instanceof mongoose.Error.DocumentNotFoundError) {
         return res
           .status(NOT_FOUND_CODE)
           .send({ message: 'Пользователь по указанному _id не найден' });
-      } if (error.name === 'ValidationError') {
+      } if (error instanceof mongoose.Error.ValidationError) {
         return res
           .status(ERROR_CODE)
           .send({ message: 'Ошибка: Некорректные данные.' });
