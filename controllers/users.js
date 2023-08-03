@@ -21,18 +21,16 @@ module.exports.getUsers = (req, res) => {
 module.exports.getUserById = (req, res) => {
   const { userId } = req.params;
 
+  // User.findById(userId)
   User.findById(userId)
-    .then((user) => {
-      if (!user) {
+    .orFail()
+    .then((user) => res.status(SUCCESS_CODE).send({ data: user }))
+    .catch((error) => {
+      if (error.name === 'DocumentNotFoundError') {
         return res
           .status(NOT_FOUND_CODE)
           .send({ message: 'Пользователь не существует' });
-      }
-
-      return res.status(SUCCESS_CODE).send({ data: user });
-    })
-    .catch((error) => {
-      if (error.name === 'CastError') {
+      } if (error.name === 'CastError') {
         return res
           .status(ERROR_CODE)
           .send({ message: 'Ошибка: Некорректные данные.' });
@@ -58,23 +56,21 @@ module.exports.createUser = (req, res) => {
 module.exports.updateUser = (req, res) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
-    .then((user) => {
-      if (!user) {
+    .orFail()
+    .then((user) => res.status(SUCCESS_CODE).send({ data: user }))
+    .catch((error) => {
+      if (error.name === 'DocumentNotFoundError') {
         return res
           .status(NOT_FOUND_CODE)
           .send({ message: 'Пользователь по указанному _id не найден' });
-      }
-      return res.status(SUCCESS_CODE).send({ data: user });
-    })
-    .catch((error) => {
-      if (error.name === 'ValidationError') {
+      } if (error.name === 'ValidationError') {
         return res
           .status(ERROR_CODE)
           .send({ message: 'Ошибка: Некорректные данные.' });
       }
       return res
         .status(SERVER_ERROR_CODE)
-        .send({ message: 'Произошла ошибка при обновлении профиля' });
+        .send({ message: 'Не удалось обновить аватар' });
     });
 };
 
@@ -85,16 +81,14 @@ module.exports.updateAvatar = (req, res) => {
     res.status(ERROR_CODE).send({ message: 'Отсутствуют данные об аватаре' });
   }
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
-    .then((user) => {
-      if (!user) {
+    .orFail()
+    .then((user) => res.status(SUCCESS_CODE).send({ data: user }))
+    .catch((error) => {
+      if (error.name === 'DocumentNotFoundError') {
         return res
           .status(NOT_FOUND_CODE)
           .send({ message: 'Пользователь по указанному _id не найден' });
-      }
-      return res.status(SUCCESS_CODE).send({ data: user });
-    })
-    .catch((error) => {
-      if (error.name === 'ValidationError') {
+      } if (error.name === 'ValidationError') {
         return res
           .status(ERROR_CODE)
           .send({ message: 'Ошибка: Некорректные данные.' });

@@ -35,16 +35,14 @@ module.exports.createCard = (req, res) => {
 // удаляем карточку
 module.exports.deleteCard = (req, res) => {
   Card.findByIdAndDelete(req.params.cardId)
-    .then((card) => {
-      if (!card) {
+    .orFail()
+    .then(() => res.status(SUCCESS_CODE).send({ message: 'Карточка успешно удалена' }))
+    .catch((error) => {
+      if (error.name === 'DocumentNotFoundError') {
         return res
           .status(NOT_FOUND_CODE)
-          .send({ message: 'Карточка с указанным идентификатором не найдена' });
-      }
-      return res.status(SUCCESS_CODE).send({ message: 'Карточка успешно удалена' });
-    })
-    .catch((error) => {
-      if (error.name === 'CastError') {
+          .send({ message: 'Карточка с указанным _id не найдена' });
+      } if (error.name === 'CastError') {
         return res
           .status(ERROR_CODE)
           .send({ message: 'Ошибка: Некорректные данные.' });
@@ -62,17 +60,14 @@ module.exports.likeCard = (req, res) => {
     // добавить _id в массив, если его там нет
     { $addToSet: { likes: req.user._id } },
     { new: true },
-  )
-    .then((card) => {
-      if (!card) {
+  ).orFail()
+    .then((card) => res.status(SUCCESS_CODE).send(card))
+    .catch((error) => {
+      if (error.name === 'DocumentNotFoundError') {
         return res
           .status(NOT_FOUND_CODE)
-          .send({ message: 'Карточка с указанным идентификатором не найдена' });
-      }
-      return res.status(SUCCESS_CODE).send(card);
-    })
-    .catch((error) => {
-      if (error.name === 'CastError') {
+          .send({ message: 'Карточка с указанным _id  не найдена' });
+      } if (error.name === 'CastError') {
         return res
           .status(ERROR_CODE)
           .send({ message: 'Ошибка: Некорректные данные.' });
@@ -90,17 +85,14 @@ module.exports.dislikeCard = (req, res) => {
     // убрать _id из массива
     { $pull: { likes: req.user._id } },
     { new: true },
-  )
-    .then((card) => {
-      if (!card) {
+  ).orFail()
+    .then((card) => res.status(SUCCESS_CODE).send(card))
+    .catch((error) => {
+      if (error.name === 'DocumentNotFoundError') {
         return res
           .status(NOT_FOUND_CODE)
-          .send({ message: 'Карточка с указанным идентификатором не найдена' });
-      }
-      return res.status(SUCCESS_CODE).send(card);
-    })
-    .catch((error) => {
-      if (error.name === 'CastError') {
+          .send({ message: 'Карточка с указанным _id не найдена' });
+      } if (error.name === 'CastError') {
         return res
           .status(ERROR_CODE)
           .send({ message: 'Ошибка: Некорректные данные.' });
