@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Card = require('../models/card');
 
 const SUCCESS_CODE = 200;
@@ -38,11 +39,11 @@ module.exports.deleteCard = (req, res) => {
     .orFail()
     .then(() => res.status(SUCCESS_CODE).send({ message: 'Карточка успешно удалена' }))
     .catch((error) => {
-      if (error.name === 'DocumentNotFoundError') {
+      if (error instanceof mongoose.Error.DocumentNotFoundError) {
         return res
           .status(NOT_FOUND_CODE)
           .send({ message: 'Карточка с указанным _id не найдена' });
-      } if (error.name === 'CastError') {
+      } if (error instanceof mongoose.Error.CastError) {
         return res
           .status(ERROR_CODE)
           .send({ message: 'Ошибка: Некорректные данные.' });
@@ -63,11 +64,11 @@ module.exports.likeCard = (req, res) => {
   ).orFail()
     .then((card) => res.status(SUCCESS_CODE).send(card))
     .catch((error) => {
-      if (error.name === 'DocumentNotFoundError') {
+      if (error instanceof mongoose.Error.DocumentNotFoundError) {
         return res
           .status(NOT_FOUND_CODE)
-          .send({ message: 'Карточка с указанным _id  не найдена' });
-      } if (error.name === 'CastError') {
+          .send({ message: 'Карточка с указанным _id не найдена' });
+      } if (error instanceof mongoose.Error.CastError) {
         return res
           .status(ERROR_CODE)
           .send({ message: 'Ошибка: Некорректные данные.' });
@@ -88,11 +89,11 @@ module.exports.dislikeCard = (req, res) => {
   ).orFail()
     .then((card) => res.status(SUCCESS_CODE).send(card))
     .catch((error) => {
-      if (error.name === 'DocumentNotFoundError') {
+      if (error instanceof mongoose.Error.DocumentNotFoundError) {
         return res
           .status(NOT_FOUND_CODE)
           .send({ message: 'Карточка с указанным _id не найдена' });
-      } if (error.name === 'CastError') {
+      } if (error instanceof mongoose.Error.CastError) {
         return res
           .status(ERROR_CODE)
           .send({ message: 'Ошибка: Некорректные данные.' });
