@@ -1,6 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const router = require('./routes');
+const routes = require('./routes');
 
 const { PORT = 3000 } = process.env;
 
@@ -24,7 +24,7 @@ app.use((req, res, next) => {
 });
 
 // подключаем роуты
-app.use(router);
+app.use(routes);
 // запускаем сервер
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
