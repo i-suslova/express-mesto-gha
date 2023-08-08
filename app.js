@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const routes = require('./routes');
+// const auth = require('./middlewares/auth');
 
 const { PORT = 3000 } = process.env;
 
@@ -15,18 +16,9 @@ const app = express();
 app.use(express.json());
 // для обработки данных, отправленных через формы HTML
 app.use(express.urlencoded({ extended: true }));
-
-app.use((req, res, next) => {
-  req.user = {
-    _id: '64c8b7c0768785f09e4d48f6',
-  };
-  next();
-});
-
+// авторизация
+// app.use(auth);
 // подключаем роуты
 app.use(routes);
 // запускаем сервер
-app.listen(PORT, () => {
-  // eslint-disable-next-line no-console
-  console.log('Port запущен');
-});
+app.listen(PORT);
