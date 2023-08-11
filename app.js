@@ -1,7 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const { errors } = require('celebrate');
 const routes = require('./routes');
-// const auth = require('./middlewares/auth');
+const { errorHandler } = require('./middlewares/errorHandler');
 
 const { PORT = 3000 } = process.env;
 
@@ -16,9 +17,11 @@ const app = express();
 app.use(express.json());
 // для обработки данных, отправленных через формы HTML
 app.use(express.urlencoded({ extended: true }));
-// авторизация
-// app.use(auth);
 // подключаем роуты
 app.use(routes);
+// централизованная обработка ошибок
+app.use(errorHandler);
+// обработчики ошибок 'celebrate'
+app.use(errors());
 // запускаем сервер
 app.listen(PORT);

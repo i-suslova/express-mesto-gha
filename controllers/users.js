@@ -2,15 +2,20 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+const {
+  errorHandler,
+  BAD_REQUEST,
+  ERROR_INVALID_USER_ID,
+  ERROR_DUPLICATE_EMAIL,
+  UNAUTHORIZED_RESPONSE,
+} = require('../middlewares/errorHandler');
+const { SECRET_KEY } = require('../middlewares/auth');
 
 const SUCCESS_CODE = 200;
 const CREATED_CODE = 201;
-const ERROR_CODE = 400;
-const NOT_FOUND_CODE = 404;
-const SERVER_ERROR_CODE = 500;
 
 // создаем нового пользователя
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -20,25 +25,30 @@ module.exports.createUser = (req, res) => {
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
-    .then((user) => res.status(CREATED_CODE).send({ data: user }))
-    .catch(() => {
-      res.status(ERROR_CODE).send({ message: 'Неверные данные' });
+    .then((user) => res.status(CREATED_CODE).send({
+      ...user.toObject(),
+      // удаляем пароль из данных перед отправкой
+      password: undefined,
+    }))
+    .catch((err) => {
+      if (err.code === 11000) {
+        return errorHandler(ERROR_DUPLICATE_EMAIL, req, res);
+      }
+      return next(err);
     });
 };
 
 // аутентификация
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
-
   return User
     .findUserByCredentials(email, password)
-
     .then((user) => {
       if (!user) {
-        return res.status(401).send({ message: 'Неверный email или пароль.' });
+        return errorHandler(UNAUTHORIZED_RESPONSE, req, res);
       }
 
-      const token = jwt.sign({ _id: user._id }, 'some-secret-key', {
+      const token = jwt.sign({ _id: user._id }, SECRET_KEY, {
         expiresIn: '7d',
       });
 
@@ -49,104 +59,81 @@ module.exports.login = (req, res) => {
 
       return res.send({ _id: user._id, token });
     })
-    .catch(() => {
-      res.status(NOT_FOUND_CODE).send({ message: 'Неверные 11данные' });
-    });
+    .catch(next);
 };
 
 // получаем информацию о пользователе
-module.exports.getUserInfo = (req, res) => {
+module.exports.getUserInfo = (req, res, next) => {
   const { _id } = req.user;
 
   User.findById(_id)
     .then((user) => {
       if (!user) {
-        return res.status(NOT_FOUND_CODE).send({ message: 'Пользователь не найден' });
+        return errorHandler(BAD_REQUEST, req, res);
       }
 
       return res.status(SUCCESS_CODE).send({ data: user });
     })
-    .catch((error) => {
-      if (error instanceof mongoose.Error.CastError) {
-        return res
-          .status(ERROR_CODE)
-          .send({ message: 'Некорректный ID пользователя' });
+    .catch((err) => {
+      if (err instanceof mongoose.Error.CastError) {
+        return errorHandler(ERROR_INVALID_USER_ID, req, res);
       }
 
-      return res
-        .status(SERVER_ERROR_CODE)
-        .send({ message: 'Произошла ошибка при получении данных пользователя' });
+      return next(err);
     });
 };
 
 // получаем пользователя по id
-module.exports.getUserById = (req, res) => {
+module.exports.getUserById = (req, res, next) => {
   const { userId } = req.params;
   User.findById(userId)
     .orFail()
     .then((user) => res.status(SUCCESS_CODE).send({ data: user }))
-    .catch((error) => {
-      if (error instanceof mongoose.Error.DocumentNotFoundError) {
-        return res
-          .status(NOT_FOUND_CODE)
-          .send({ message: 'Пользователь не существует' });
-      } if (error instanceof mongoose.Error.CastError) {
-        return res
-          .status(ERROR_CODE)
-          .send({ message: 'Ошибка: Некорректные данные.' });
+
+    .catch((err) => {
+      if (err instanceof mongoose.Error.DocumentNotFoundError) {
+        return errorHandler(ERROR_INVALID_USER_ID, req, res);
+      } if (err instanceof mongoose.Error.CastError) {
+        return errorHandler(BAD_REQUEST, req, res);
       }
-      return res
-        .status(SERVER_ERROR_CODE)
-        .send({ message: 'Произошла ошибка при получении данных' });
+      return next(err);
     });
 };
 
 // обновляем сведения о пользователе
-module.exports.updateUser = (req, res) => {
+module.exports.updateUser = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true })
     .orFail()
     .then((user) => res.status(SUCCESS_CODE).send({ data: user }))
-    .catch((error) => {
-      if (error instanceof mongoose.Error.DocumentNotFoundError) {
-        return res
-          .status(NOT_FOUND_CODE)
-          .send({ message: 'Пользователь по указанному _id не найден' });
+    .catch((err) => {
+      if (err instanceof mongoose.Error.DocumentNotFoundError) {
+        return errorHandler(BAD_REQUEST, req, res);
       }
-      return res
-        .status(SERVER_ERROR_CODE)
-        .send({ message: 'Не удалось обновить информацию' });
+      return next(err);
     });
 };
 
 // обновляем аватар пользователя
-module.exports.updateAvatar = (req, res) => {
+module.exports.updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
   if (!avatar) {
-    res.status(ERROR_CODE).send({ message: 'Отсутствуют данные об аватаре' });
+    errorHandler(BAD_REQUEST, res);
   }
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true })
     .orFail()
     .then((user) => res.status(SUCCESS_CODE).send({ data: user }))
-    .catch((error) => {
-      if (error instanceof mongoose.Error.DocumentNotFoundError) {
-        return res
-          .status(NOT_FOUND_CODE)
-          .send({ message: 'Пользователь по указанному _id не найден' });
+    .catch((err) => {
+      if (err instanceof mongoose.Error.DocumentNotFoundError) {
+        return errorHandler(BAD_REQUEST, res);
       }
-      return res
-        .status(SERVER_ERROR_CODE)
-        .send({ message: 'Не удалось обновить аватар' });
+      return next(err);
     });
 };
 
 // получаем всех пользователей
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.status(SUCCESS_CODE).send({ data: users }))
-    .catch(() => {
-      res
-        .status(SERVER_ERROR_CODE)
-        .send({ message: 'На сервере произошла ошибка' });
-    });
+    .catch(next);
 };
