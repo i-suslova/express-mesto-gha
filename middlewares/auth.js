@@ -21,6 +21,7 @@ module.exports.authUser = (req, res, next) => {
     }
 
     req.user = payload;
+
     return next();
   });
 };

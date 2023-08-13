@@ -30,6 +30,7 @@ module.exports.createUser = (req, res, next) => {
       // удаляем пароль из данных перед отправкой
       password: undefined,
     }))
+
     .catch((err) => {
       if (err.code === 11000) {
         return errorHandler(ERROR_DUPLICATE_EMAIL, req, res);
@@ -56,7 +57,7 @@ module.exports.login = (req, res, next) => {
         httpOnly: true,
         maxAge: 3600000 * 24 * 7,
       });
-
+      req.user = { _id: user._id };
       return res.send({ _id: user._id, token });
     })
     .catch(next);
@@ -67,13 +68,11 @@ module.exports.getUserInfo = (req, res, next) => {
   const { _id } = req.user;
 
   User.findById(_id)
+    .orFail()
     .then((user) => {
-      if (!user) {
-        return errorHandler(BAD_REQUEST, req, res);
-      }
-
-      return res.status(SUCCESS_CODE).send({ data: user });
+      res.status(SUCCESS_CODE).send({ data: user });
     })
+
     .catch((err) => {
       if (err instanceof mongoose.Error.CastError) {
         return errorHandler(ERROR_INVALID_USER_ID, req, res);
@@ -87,6 +86,7 @@ module.exports.getUserInfo = (req, res, next) => {
 module.exports.getUserById = (req, res, next) => {
   const { userId } = req.params;
   User.findById(userId)
+
     .orFail()
     .then((user) => res.status(SUCCESS_CODE).send({ data: user }))
 
@@ -103,9 +103,12 @@ module.exports.getUserById = (req, res, next) => {
 // обновляем сведения о пользователе
 module.exports.updateUser = (req, res, next) => {
   const { name, about } = req.body;
+
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true })
     .orFail()
-    .then((user) => res.status(SUCCESS_CODE).send({ data: user }))
+    .then((user) => {
+      res.status(SUCCESS_CODE).send({ data: user });
+    })
     .catch((err) => {
       if (err instanceof mongoose.Error.DocumentNotFoundError) {
         return errorHandler(BAD_REQUEST, req, res);
@@ -118,14 +121,14 @@ module.exports.updateUser = (req, res, next) => {
 module.exports.updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
   if (!avatar) {
-    errorHandler(BAD_REQUEST, res);
+    errorHandler(BAD_REQUEST, req, res);
   }
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true })
     .orFail()
     .then((user) => res.status(SUCCESS_CODE).send({ data: user }))
     .catch((err) => {
       if (err instanceof mongoose.Error.DocumentNotFoundError) {
-        return errorHandler(BAD_REQUEST, res);
+        errorHandler(BAD_REQUEST, req, res);
       }
       return next(err);
     });

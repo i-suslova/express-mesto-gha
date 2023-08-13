@@ -11,7 +11,7 @@ module.exports.errorHandler = (err, req, res) => {
   if (err && err.status) {
     res.status(statusCode).send({ message });
   } else {
-    res.status(SERVER_ERROR_CODE).send({ message });
+    res.status(SERVER_ERROR_CODE).send('На сервере произошла ошибка.');
   }
 };
 
