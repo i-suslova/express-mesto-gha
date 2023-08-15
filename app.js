@@ -17,11 +17,13 @@ const app = express();
 app.use(express.json());
 // для обработки данных, отправленных через формы HTML
 app.use(express.urlencoded({ extended: true }));
+
 // подключаем роуты
 app.use(routes);
-// централизованная обработка ошибок
-app.use(errorHandler);
 // обработчики ошибок 'celebrate'
 app.use(errors());
+// централизованная обработка ошибок
+app.use(errorHandler);
+
 // запускаем сервер
 app.listen(PORT);

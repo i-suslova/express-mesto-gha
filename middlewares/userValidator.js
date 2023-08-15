@@ -35,6 +35,14 @@ module.exports.avatarValidator = celebrate({
 
 module.exports.userByIdValidator = celebrate({
   params: Joi.object().keys({
-    userId: Joi.string().alphanum().length(24).hex(),
+    userId: Joi.string()
+      .alphanum()
+      .length(24)
+      .hex()
+      .messages({
+        'string.alphanum': 'ID должен содержать только буквенно-цифровые символы',
+        'string.length': 'ID должен содержать ровно 24 символа',
+        'string.hex': 'ID должен быть в шестнадцатеричном формате',
+      }),
   }),
 });

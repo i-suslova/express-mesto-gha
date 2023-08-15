@@ -4,20 +4,32 @@ const NOT_FOUND_CODE = 404;
 const CONFLICT_CODE = 409;
 const SERVER_ERROR_CODE = 500;
 
+// module.exports.errorHandler = (err, req, res, next) => {
+// module.exports.errorHandler = (err, req, res) => {
+//   const statusCode = err.status || SERVER_ERROR_CODE;
+//   const message = err.message || 'На сервере произошла ошибка.';
+
+//   res.status(statusCode).send({ message });
+//   // next();
+// };
+
 module.exports.errorHandler = (err, req, res) => {
   const statusCode = err.status || SERVER_ERROR_CODE;
-  const message = err.message || 'Произошла ошибка на сервере';
+  const message = err.message || 'На сервере произошла ошибка.';
 
-  if (err && err.status) {
-    res.status(statusCode).send({ message });
-  } else {
-    res.status(SERVER_ERROR_CODE).send('На сервере произошла ошибка.');
+  // ошибка валидации celebrate
+  if (err.joi) {
+    return res.status(statusCode).json({
+      error: err.joi.details[0].message,
+    });
   }
+
+  return res.status(statusCode).json({ error: message });
 };
 
 module.exports.BAD_REQUEST = {
   status: ERROR_CODE,
-  message: 'Некорректные данные пользователя.',
+  message: 'Некорректные данные .',
 };
 
 module.exports.BAD_REQUEST_CARD = {
@@ -32,7 +44,7 @@ module.exports.UNAUTHORIZED_RESPONSE = {
 
 module.exports.ERROR_INVALID_USER_ID = {
   status: NOT_FOUND_CODE,
-  message: 'Некорректный ID пользователя',
+  message: 'Некорректный ID 99999999пользователя',
 };
 
 module.exports.ERROR_INVALID_CARD_ID = {
