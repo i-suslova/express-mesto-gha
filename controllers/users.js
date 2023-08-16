@@ -38,9 +38,11 @@ module.exports.createUser = (req, res, next) => {
     .catch((err) => {
       if (err.code === 11000) {
         errorHandler(ERROR_DUPLICATE_EMAIL, req, res);
-      } else {
-        next(err);
       }
+      if (err instanceof mongoose.Error.ValidationError) {
+        errorHandler(BAD_REQUEST, req, res);
+      }
+      next(err);
     });
 };
 

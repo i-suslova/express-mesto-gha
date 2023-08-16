@@ -1,9 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const { errors } = require('celebrate');
-
-// eslint-disable-next-line no-unused-vars
-const { celebrate, Joi } = require('celebrate');
 const routes = require('./routes');
 const { errorHandler } = require('./middlewares/errorHandler');
 
