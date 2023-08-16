@@ -25,15 +25,16 @@ module.exports.createUser = (req, res, next) => {
   } = req.body;
 
   bcrypt.hash(password, 10)
-
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
-    .then((user) => res.status(CREATED_CODE).send({
-      ...user.toObject(),
-      // удаляем пароль из данных перед отправкой
-      password: undefined,
-    }))
+    .then((user) => {
+      const { _id, ...userData } = user.toObject();
+      res.status(CREATED_CODE).send({
+        ...userData,
+        password: undefined,
+      });
+    })
     .catch((err) => {
       if (err.code === 11000) {
         errorHandler(ERROR_DUPLICATE_EMAIL, req, res);
@@ -43,7 +44,7 @@ module.exports.createUser = (req, res, next) => {
     });
 };
 
-// аутентификация
+// // аутентификация
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   return User
@@ -53,12 +54,7 @@ module.exports.login = (req, res, next) => {
         expiresIn: '7d',
       });
 
-      // res.cookie('jwt', token, {
-      //   httpOnly: true,
-      //   maxAge: 3600000 * 24 * 7,
-      // });
-      req.user = { _id: user._id };
-      return res.send({ _id: user._id, token });
+      res.status(SUCCESS_CODE).send({ token });
     })
 
     .catch((err) => {
