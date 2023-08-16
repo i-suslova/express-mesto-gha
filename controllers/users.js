@@ -11,7 +11,6 @@ const {
   UNAUTHORIZED_RESPONSE,
 } = require('../middlewares/errorHandler');
 
-const { SECRET_KEY } = require('../middlewares/auth');
 // const BadRequestError = require('../middlewares/ss');
 // const ConflictError = require('../middlewares/email');
 
@@ -45,14 +44,37 @@ module.exports.createUser = (req, res, next) => {
       next(err);
     });
 };
+// module.exports.createUser = (req, res, next) => {
+//   const {
+//     name, about, avatar, email, password,
+//   } = req.body;
 
+//   bcrypt.hash(password, 10)
+
+//     .then((hash) => User.create({
+//       name, about, avatar, email, password: hash,
+//     }))
+//     .then((user) => res.status(CREATED_CODE).send({
+//       ...user.toObject(),
+//       // удаляем пароль из данных перед отправкой
+//       password: undefined,
+//     }))
+
+//     .catch((err) => {
+//       if (err.code === 11000) {
+//         errorHandler(ERROR_DUPLICATE_EMAIL, req, res);
+//       } else {
+//         next(err);
+//       }
+//     });
+// };
 // // аутентификация
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   return User
     .findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, SECRET_KEY, {
+      const token = jwt.sign({ _id: user._id }, 'some-secret-key', {
         expiresIn: '7d',
       });
 

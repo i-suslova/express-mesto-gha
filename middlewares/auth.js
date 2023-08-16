@@ -4,24 +4,23 @@ const {
   UNAUTHORIZED_RESPONSE,
 } = require('./errorHandler');
 
-module.exports.SECRET_KEY = 'some-secret-key';
-
 module.exports.authUser = (req, res, next) => {
   const { authorization } = req.headers;
 
   if (!authorization || !authorization.startsWith('Bearer ')) {
-    return errorHandler(UNAUTHORIZED_RESPONSE, req, res);
+    errorHandler(UNAUTHORIZED_RESPONSE, req, res);
   }
 
   const token = authorization.replace('Bearer ', '');
+  let payload;
 
-  return jwt.verify(token, 'some-secret-key', (err, payload) => {
-    if (err) {
-      return errorHandler(UNAUTHORIZED_RESPONSE, req, res);
-    }
+  try {
+    payload = jwt.verify(token, 'some-secret-key');
+  } catch (err) {
+    errorHandler(UNAUTHORIZED_RESPONSE, req, res);
+  }
 
-    req.user = payload;
+  req.user = payload;
 
-    return next();
-  });
+  next();
 };

@@ -4,18 +4,19 @@ const NOT_FOUND_CODE = 404;
 const CONFLICT_CODE = 409;
 const SERVER_ERROR_CODE = 500;
 
-module.exports.errorHandler = (err, req, res) => {
+module.exports.errorHandler = (err, req, res, next) => {
   const statusCode = err.status || SERVER_ERROR_CODE;
   const message = err.message || 'На сервере произошла ошибка.';
 
   // ошибка валидации celebrate
-  if (err.joi) {
-    return res.status(statusCode).send({
-      error: err.joi.details[0].message,
-    });
-  }
+  // if (err.joi) {
+  //   return res.status(statusCode).send({
+  //     error: err.joi.details[0].message,
+  //   });
+  // }
 
-  return res.status(statusCode).send({ message });
+  res.status(statusCode).send({ message });
+  next();
 };
 
 module.exports.BAD_REQUEST = {
