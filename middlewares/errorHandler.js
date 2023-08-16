@@ -4,27 +4,18 @@ const NOT_FOUND_CODE = 404;
 const CONFLICT_CODE = 409;
 const SERVER_ERROR_CODE = 500;
 
-// module.exports.errorHandler = (err, req, res, next) => {
-// module.exports.errorHandler = (err, req, res) => {
-//   const statusCode = err.status || SERVER_ERROR_CODE;
-//   const message = err.message || 'На сервере произошла ошибка.';
-
-//   res.status(statusCode).send({ message });
-//   // next();
-// };
-
 module.exports.errorHandler = (err, req, res) => {
   const statusCode = err.status || SERVER_ERROR_CODE;
   const message = err.message || 'На сервере произошла ошибка.';
 
   // ошибка валидации celebrate
   if (err.joi) {
-    return res.status(statusCode).json({
+    return res.status(statusCode).send({
       error: err.joi.details[0].message,
     });
   }
 
-  return res.status(statusCode).json({ error: message });
+  return res.status(statusCode).send({ message });
 };
 
 module.exports.BAD_REQUEST = {
@@ -53,10 +44,10 @@ module.exports.ERROR_INVALID_CARD_ID = {
 };
 module.exports.ERROR_INVALID_PATH = {
   status: NOT_FOUND_CODE,
-  message: 'Запрашиваемый ресурс не найден',
+  message: 'Запрашиваемый ресурс 11не найден',
 };
 
 module.exports.ERROR_DUPLICATE_EMAIL = {
   status: CONFLICT_CODE,
-  message: 'Пользователь с таким email уже существует',
+  message: 'Пользователь lfyesс таким email уже существует',
 };

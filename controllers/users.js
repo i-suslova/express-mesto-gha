@@ -12,6 +12,8 @@ const {
 } = require('../middlewares/errorHandler');
 
 const { SECRET_KEY } = require('../middlewares/auth');
+// const BadRequestError = require('../middlewares/ss');
+// const ConflictError = require('../middlewares/email');
 
 const SUCCESS_CODE = 200;
 const CREATED_CODE = 201;
@@ -32,12 +34,12 @@ module.exports.createUser = (req, res, next) => {
       // удаляем пароль из данных перед отправкой
       password: undefined,
     }))
-
     .catch((err) => {
       if (err.code === 11000) {
-        return errorHandler(ERROR_DUPLICATE_EMAIL, req, res);
+        errorHandler(ERROR_DUPLICATE_EMAIL, req, res);
+      } else {
+        next(err);
       }
-      return next(err);
     });
 };
 
@@ -47,10 +49,6 @@ module.exports.login = (req, res, next) => {
   return User
     .findUserByCredentials(email, password)
     .then((user) => {
-      if (!user) {
-        return errorHandler(UNAUTHORIZED_RESPONSE, req, res);
-      }
-
       const token = jwt.sign({ _id: user._id }, SECRET_KEY, {
         expiresIn: '7d',
       });
@@ -62,7 +60,13 @@ module.exports.login = (req, res, next) => {
       req.user = { _id: user._id };
       return res.send({ _id: user._id, token });
     })
-    .catch(next);
+
+    .catch((err) => {
+      if (err instanceof mongoose.Error.DocumentNotFoundError) {
+        errorHandler(UNAUTHORIZED_RESPONSE, req, res);
+      }
+      next(err);
+    });
 };
 
 // получаем информацию о пользователе
@@ -110,9 +114,10 @@ module.exports.updateUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err instanceof mongoose.Error.DocumentNotFoundError) {
-        return errorHandler(BAD_REQUEST, req, res);
+        errorHandler(BAD_REQUEST, req, res);
       }
-      return next(err);
+
+      next(err);
     });
 };
 

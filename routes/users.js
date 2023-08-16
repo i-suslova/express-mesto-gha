@@ -24,11 +24,11 @@ router.post('/signup', signupValidator, createUser);
 // роут для аутентификации
 router.post('/signin', loginValidator, login);
 
-// роут для получения информации о текущем пользователе
-router.get('/me', authUser, getUserInfo);
-
 // роут для получения всех пользователей
 router.get('/', authUser, getUsers);
+
+// роут для получения информации о текущем пользователе
+router.get('/me', authUser, getUserInfo);
 
 // роут для получения пользователя по _id
 router.get('/:userId', authUser, userByIdValidator, getUserById);

@@ -43,20 +43,26 @@ const userSchema = new mongoose.Schema(
     versionKey: false,
   },
 );
-userSchema.statics.findUserByCredentials = function (email, password) {
-  return this.findOne({ email }).select('+password').then((user) => {
-    if (!user) {
-      throw new Error('Пользователь не найден');
-    }
 
-    return bcrypt.compare(password, user.password).then((passwordsMatch) => {
-      if (!passwordsMatch) {
-        throw new Error('Неверный пароль или email');
+userSchema.statics.findUserByCredentials = function (email, password) {
+  return this.findOne({ email }).select('+password')
+    .then((user) => {
+      if (!user) {
+        const err = new mongoose.Error.DocumentNotFoundError();
+        err.message = 'Пользователь с указанными данными не найден';
+        throw err;
       }
 
-      return user;
+      return bcrypt.compare(password, user.password)
+        .then((passwordsMatch) => {
+          if (!passwordsMatch) {
+            const err = new mongoose.Error.DocumentNotFoundError();
+            err.message = 'Неправильные почта или пароль';
+            throw err;
+          }
+          return user;
+        });
     });
-  });
 };
 
 module.exports = mongoose.model('user', userSchema);
