@@ -11,7 +11,7 @@ const {
   createCarddValidator,
   deleteCardValidator,
   likeDislikeValidator,
-} = require('../middlewares/cardValidator');
+} = require('../validators/cardValidator');
 
 // Роут для возврата всех карточек
 router.get('/', authUser, getAllCards);

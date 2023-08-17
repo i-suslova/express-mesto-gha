@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const { errors } = require('celebrate');
 const routes = require('./routes');
-const { errorHandler } = require('./middlewares/errorHandler');
+const { errorsHandler } = require('./middlewares/errorHandler');
 
 const { PORT = 3000 } = process.env;
 
@@ -21,9 +21,9 @@ app.use(express.urlencoded({ extended: true }));
 // подключаем роуты
 app.use(routes);
 // обработчики ошибок 'celebrate'
-app.use(errors());
+app.use(errors);
 // централизованная обработка ошибок
-app.use(errorHandler);
+app.use(errorsHandler);
 
 // запускаем сервер
 app.listen(PORT);

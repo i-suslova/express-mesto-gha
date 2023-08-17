@@ -9,11 +9,11 @@ module.exports.errorHandler = (err, req, res, next) => {
   const message = err.message || 'На сервере произошла ошибка.';
 
   // ошибка валидации celebrate
-  // if (err.joi) {
-  //   return res.status(statusCode).send({
-  //     error: err.joi.details[0].message,
-  //   });
-  // }
+  if (err.joi) {
+    res.status(statusCode).send({
+      error: err.joi.details[0].message,
+    });
+  }
 
   res.status(statusCode).send({ message });
   next();

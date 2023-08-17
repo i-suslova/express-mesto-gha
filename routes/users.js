@@ -16,7 +16,7 @@ const {
   updateUserValidator,
   avatarValidator,
   userByIdValidator,
-} = require('../middlewares/userValidator');
+} = require('../validators/userValidator');
 
 // роут для регистрации пользователя
 router.post('/signup', signupValidator, createUser);
