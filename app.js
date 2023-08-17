@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const { errors } = require('celebrate');
 const routes = require('./routes');
-const { errorsHandler } = require('./middlewares/errorHandler');
+const { errorHandler } = require('./middlewares/errorHandler');
 
 const { PORT = 3000 } = process.env;
 
@@ -23,7 +23,7 @@ app.use(routes);
 // обработчики ошибок 'celebrate'
 app.use(errors);
 // централизованная обработка ошибок
-app.use(errorsHandler);
+app.use(errorHandler);
 
 // запускаем сервер
 app.listen(PORT);
