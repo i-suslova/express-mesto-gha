@@ -4,15 +4,10 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
 const {
-  errorHandler,
-  BAD_REQUEST,
-  ERROR_INVALID_USER_ID,
-  ERROR_DUPLICATE_EMAIL,
-  UNAUTHORIZED_RESPONSE,
-} = require('../middlewares/errorHandler');
-
-// const BadRequestError = require('../middlewares/ss');
-// const ConflictError = require('../middlewares/email');
+  BadRequestError,
+  NotFoundError,
+  ConflictError,
+} = require('../errors/indexErrors');
 
 const SUCCESS_CODE = 200;
 const CREATED_CODE = 201;
@@ -24,56 +19,41 @@ module.exports.createUser = (req, res, next) => {
   } = req.body;
 
   bcrypt.hash(password, 10)
+
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
-    .then((user) => {
-      const { _id, ...userData } = user.toObject();
-      res.status(CREATED_CODE).send({
-        ...userData,
-        password: undefined,
-      });
-    })
+    .then((user) => res.status(CREATED_CODE).send({
+      ...user.toObject(),
+      // удаляем пароль из данных перед отправкой
+      password: undefined,
+    }))
+
     .catch((err) => {
+      // if (err instanceof mongoose.Error.ValidationError) {
+      //   next(new BadRequestError('Некорректные данные пользователя.'));
+      // } else
       if (err.code === 11000) {
-        errorHandler(ERROR_DUPLICATE_EMAIL, req, res);
+        // eslint-disable-next-line no-console
+        console.log('ConflictError:', err.message);
+        next(new ConflictError('Пользователь с таким email уже существует.'));
+      } else {
+        // eslint-disable-next-line no-console
+        console.log('OtherError:', err);
+        next(err);
       }
-      if (err instanceof mongoose.Error.ValidationError) {
-        errorHandler(BAD_REQUEST, req, res);
-      }
-      next(err);
     });
 };
-// module.exports.createUser = (req, res, next) => {
-//   const {
-//     name, about, avatar, email, password,
-//   } = req.body;
 
-//   bcrypt.hash(password, 10)
-
-//     .then((hash) => User.create({
-//       name, about, avatar, email, password: hash,
-//     }))
-//     .then((user) => res.status(CREATED_CODE).send({
-//       ...user.toObject(),
-//       // удаляем пароль из данных перед отправкой
-//       password: undefined,
-//     }))
-
-//     .catch((err) => {
-//       if (err.code === 11000) {
-//         errorHandler(ERROR_DUPLICATE_EMAIL, req, res);
-//       } else {
-//         next(err);
-//       }
-//     });
-// };
-// // аутентификация
+// аутентификация
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   return User
     .findUserByCredentials(email, password)
     .then((user) => {
+      if (!email || !password) {
+        next(new BadRequestError('Укажите адрес электронной почты и пароль.'));
+      }
       const token = jwt.sign({ _id: user._id }, 'some-secret-key', {
         expiresIn: '7d',
       });
@@ -81,12 +61,7 @@ module.exports.login = (req, res, next) => {
       res.status(SUCCESS_CODE).send({ token });
     })
 
-    .catch((err) => {
-      if (err instanceof mongoose.Error.DocumentNotFoundError) {
-        errorHandler(UNAUTHORIZED_RESPONSE, req, res);
-      }
-      next(err);
-    });
+    .catch(next);
 };
 
 // получаем информацию о пользователе
@@ -100,11 +75,10 @@ module.exports.getUserInfo = (req, res, next) => {
     })
 
     .catch((err) => {
-      if (err instanceof mongoose.Error.CastError) {
-        return errorHandler(ERROR_INVALID_USER_ID, req, res);
+      if (err instanceof mongoose.Error.DocumentNotFoundError) {
+        next(new NotFoundError('Пользователь не найден'));
       }
-
-      return next(err);
+      next(err);
     });
 };
 
@@ -115,11 +89,23 @@ module.exports.getUserById = (req, res, next) => {
   User.findById(userId)
     .orFail()
     .then((user) => res.status(SUCCESS_CODE).send({ data: user }))
+    // .catch((err) => {
+    //   if (err instanceof mongoose.Error.DocumentNotFoundError) {
+    //     next(new NotFoundError('Пользователь не найден'));
+    //   } else if (err instanceof mongoose.Error.CastError) {
+    //     next(new BadRequestError('Некорректный ID пользователя.'));
+    //   } else {
+    //     next(err);
+    //   }
     .catch((err) => {
-      if (err instanceof mongoose.Error.DocumentNotFoundError) {
-        return errorHandler(ERROR_INVALID_USER_ID, req, res);
+      if (err instanceof mongoose.Error.CastError) {
+        next(new BadRequestError('Некорректный ID пользователя.'));
+      } else if (err instanceof mongoose.Error.DocumentNotFoundError) {
+        next(new NotFoundError('Пользователь не найден'));
+      } else {
+        next(err);
       }
-      return next(err);
+      // });
     });
 };
 
@@ -128,33 +114,32 @@ module.exports.updateUser = (req, res, next) => {
   const { name, about } = req.body;
 
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true })
-    .orFail()
+    .orFail(new NotFoundError('Пользователь не найден'))
     .then((user) => {
       res.status(SUCCESS_CODE).send({ data: user });
     })
     .catch((err) => {
-      if (err instanceof mongoose.Error.DocumentNotFoundError) {
-        errorHandler(BAD_REQUEST, req, res);
+      if (err instanceof mongoose.Error.ValidationError) {
+        next(new BadRequestError('Некорректные данные пользователя.'));
+      } else {
+        next(err);
       }
-
-      next(err);
     });
 };
 
 // обновляем аватар пользователя
 module.exports.updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
-  if (!avatar) {
-    errorHandler(BAD_REQUEST, req, res);
-  }
+
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true })
-    .orFail()
+    .orFail(new NotFoundError('Пользователь не найден'))
     .then((user) => res.status(SUCCESS_CODE).send({ data: user }))
     .catch((err) => {
-      if (err instanceof mongoose.Error.DocumentNotFoundError) {
-        errorHandler(BAD_REQUEST, req, res);
+      if (err instanceof mongoose.Error.ValidationError) {
+        next(new BadRequestError('Некорректные данные пользователя.'));
+      } else {
+        next(err);
       }
-      return next(err);
     });
 };
 

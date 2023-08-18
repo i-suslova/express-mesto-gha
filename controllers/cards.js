@@ -1,13 +1,14 @@
 const mongoose = require('mongoose');
 const Card = require('../models/card');
 
+const {
+  BadRequestError,
+  ForbiddenError,
+  NotFoundError,
+} = require('../errors/indexErrors');
+
 const SUCCESS_CODE = 200;
 const CREATED_CODE = 201;
-const {
-  errorHandler,
-  BAD_REQUEST_CARD,
-  ERROR_INVALID_CARD_ID,
-} = require('../middlewares/errorHandler');
 
 // получаем список карточек
 module.exports.getAllCards = (req, res, next) => {
@@ -23,8 +24,8 @@ module.exports.createCard = (req, res, next) => {
   Card.create({ name, link, owner: req.user._id })
     .then((card) => res.status(CREATED_CODE).send(card))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        errorHandler(BAD_REQUEST_CARD, req, res);
+      if (err instanceof mongoose.Error.ValidationError) {
+        next(new BadRequestError('Некорректные данные карточки.'));
       } else {
         next(err);
       }
@@ -33,17 +34,21 @@ module.exports.createCard = (req, res, next) => {
 
 // удаляем карточку
 module.exports.deleteCard = (req, res, next) => {
-  Card.findByIdAndDelete(req.params.cardId)
+  const userId = req.user._id;
+  Card.findById(req.params.cardId)
     .orFail()
-    .then(() => res.status(SUCCESS_CODE).send({ message: 'Карточка успешно удалена' }))
-    .catch((err) => {
-      if (err instanceof mongoose.Error.DocumentNotFoundError) {
-        return errorHandler(ERROR_INVALID_CARD_ID, req, res);
-      } if (err instanceof mongoose.Error.CastError) {
-        return errorHandler(BAD_REQUEST_CARD, req, res);
+    .then((card) => {
+      if (!card) {
+        next(new NotFoundError('Карточка не найдена'));
+        // проверяем, что текущий пользователь создал карточку
+      } else if (!card.creator.equals(userId)) {
+        next(new ForbiddenError('У вас нет прав на удаление этой карточки'));
       }
-      return next(err);
-    });
+      return Card.findByIdAndDelete(req.params.cardId);
+    })
+
+    .then(() => res.status(SUCCESS_CODE).send({ message: 'Карточка успешно удалена' }))
+    .catch(next);
 };
 
 // ставим лайк
@@ -53,15 +58,15 @@ module.exports.likeCard = (req, res, next) => {
     // добавить _id в массив, если его там нет
     { $addToSet: { likes: req.user._id } },
     { new: true },
-  ).orFail()
+  )
+    .orFail()
     .then((card) => res.status(SUCCESS_CODE).send(card))
     .catch((err) => {
-      if (err instanceof mongoose.Error.DocumentNotFoundError) {
-        return errorHandler(ERROR_INVALID_CARD_ID, req, res);
-      } if (err instanceof mongoose.Error.CastError) {
-        return errorHandler(BAD_REQUEST_CARD, req, res);
+      if (err instanceof mongoose.Error.CastError) {
+        next(new BadRequestError('Недопустимый формат данных.'));
+      } else {
+        next(err);
       }
-      return next(err);
     });
 };
 
@@ -75,11 +80,10 @@ module.exports.dislikeCard = (req, res, next) => {
   ).orFail()
     .then((card) => res.status(SUCCESS_CODE).send(card))
     .catch((err) => {
-      if (err instanceof mongoose.Error.DocumentNotFoundError) {
-        return errorHandler(ERROR_INVALID_CARD_ID, req, res);
-      } if (err instanceof mongoose.Error.CastError) {
-        return errorHandler(BAD_REQUEST_CARD, req, res);
+      if (err instanceof mongoose.Error.CastError) {
+        next(new BadRequestError('Недопустимый формат данных.'));
+      } else {
+        next(err);
       }
-      return next(err);
     });
 };

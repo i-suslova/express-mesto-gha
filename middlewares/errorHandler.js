@@ -1,54 +1,48 @@
-const ERROR_CODE = 400;
-const UNAUTHORIZED_CODE = 401;
-const NOT_FOUND_CODE = 404;
-const CONFLICT_CODE = 409;
+// const SERVER_ERROR_CODE = 500;
+
+// module.exports = (err, req, res, next) => {
+//   const { statusCode = SERVER_ERROR_CODE, message } = err;
+//   res.status(statusCode).send({
+//   // res.status(err.statusCode).send({
+//     message: statusCode === SERVER_ERROR_CODE ? 'На сервере произошла ошибка.' : message,
+//   });
+//   // return next();
+//   next();
+// };
 const SERVER_ERROR_CODE = 500;
 
-module.exports.errorHandler = (err, req, res, next) => {
-  const statusCode = err.status || SERVER_ERROR_CODE;
-  const message = err.message || 'На сервере произошла ошибка.';
+// module.exports = (err, req, res, next) => {
+//   if (err.details) {
+//     const errorMessage = err.details.body[0].message;
+//     res.status(400).send({ message: errorMessage });
+//   } else {
+//     const { statusCode = SERVER_ERROR_CODE, message } = err;
+//     res.status(statusCode).send({
+//       message: statusCode === SERVER_ERROR_CODE ? 'На сервере произошла ошибка.' : message,
+//     });
+//   }
+//   next();
+// };
+module.exports = (err, req, res, next) => {
+  // eslint-disable-next-line no-console
+  console.log('Central error handler:', err);
 
-  // ошибка валидации celebrate
-  if (err.joi) {
+  if (err.details) {
+    const errorMessage = err.details.body[0].message;
+    // eslint-disable-next-line no-console
+    console.log('ValidationError:', errorMessage);
+    res.status(400).send({ message: errorMessage });
+  } else if (err.isJoi) {
+    // eslint-disable-next-line no-console
+    console.log('JoiError:', err.message);
+    res.status(400).send({ message: err.message });
+  } else {
+    const { statusCode = SERVER_ERROR_CODE, message } = err;
+    // eslint-disable-next-line no-console
+    console.log('OtherError:', message);
     res.status(statusCode).send({
-      error: err.joi.details[0].message,
+      message: statusCode === SERVER_ERROR_CODE ? 'На сервере произошла ошибка.' : message,
     });
   }
-
-  res.status(statusCode).send({ message });
   next();
-};
-
-module.exports.BAD_REQUEST = {
-  status: ERROR_CODE,
-  message: 'Некорректные данные .',
-};
-
-module.exports.BAD_REQUEST_CARD = {
-  status: ERROR_CODE,
-  message: 'Некорректные данные карточки.',
-};
-
-module.exports.UNAUTHORIZED_RESPONSE = {
-  status: UNAUTHORIZED_CODE,
-  message: 'Необходима авторизация',
-};
-
-module.exports.ERROR_INVALID_USER_ID = {
-  status: NOT_FOUND_CODE,
-  message: 'Некорректный ID 99999999пользователя',
-};
-
-module.exports.ERROR_INVALID_CARD_ID = {
-  status: NOT_FOUND_CODE,
-  message: 'Некорректный ID карточки',
-};
-module.exports.ERROR_INVALID_PATH = {
-  status: NOT_FOUND_CODE,
-  message: 'Запрашиваемый ресурс 11не найден',
-};
-
-module.exports.ERROR_DUPLICATE_EMAIL = {
-  status: CONFLICT_CODE,
-  message: 'Пользователь lfyesс таким email уже существует',
 };

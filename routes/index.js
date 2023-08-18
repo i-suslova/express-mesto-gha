@@ -2,14 +2,19 @@ const router = require('express').Router();
 const users = require('./users');
 const cards = require('./cards');
 
-const {
-  errorHandler,
-  ERROR_INVALID_PATH,
-} = require('../middlewares/errorHandler');
+const { NotFoundError } = require('../errors/indexErrors');
 
 router.use('/users', users);
 router.use('/cards', cards);
 
 // несуществующий путь
-router.use('/*', (req, res) => errorHandler(ERROR_INVALID_PATH, req, res));
+// router.use('/*', (req, res, next) => {
+//   next(new NotFoundError('Страница не найдена'));
+// });
+router.use('*', (req, res, next) => {
+  const err = new NotFoundError('По указанному пути ничего не найдено');
+  next(err);
+  // next(new NotFoundError('Маршрут не найден'));
+});
+
 module.exports = router;

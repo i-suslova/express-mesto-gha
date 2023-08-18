@@ -48,17 +48,13 @@ userSchema.statics.findUserByCredentials = function (email, password) {
   return this.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        const err = new mongoose.Error.DocumentNotFoundError();
-        err.message = 'Пользователь с указанными данными не найден';
-        throw err;
+        throw new Error('Пользователь с указанными данными не найден');
       }
 
       return bcrypt.compare(password, user.password)
         .then((passwordsMatch) => {
           if (!passwordsMatch) {
-            const err = new mongoose.Error.DocumentNotFoundError();
-            err.message = 'Неправильные почта или пароль';
-            throw err;
+            throw new Error('Неправильные почта или 9пароль');
           }
           return user;
         });
