@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
 const { errors } = require('celebrate');
 const routes = require('./routes');
 const errorHandler = require('./middlewares/errorHandler');
@@ -12,7 +13,7 @@ mongoose
   });
 
 const app = express();
-
+app.use(bodyParser.json());
 // для собирания JSON-формата
 app.use(express.json());
 // для обработки данных, отправленных через формы HTML
