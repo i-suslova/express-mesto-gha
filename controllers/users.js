@@ -7,6 +7,7 @@ const {
   BadRequestError,
   NotFoundError,
   ConflictError,
+  UnauthorizedError,
 } = require('../errors/indexErrors');
 
 const SUCCESS_CODE = 200;
@@ -52,8 +53,13 @@ module.exports.login = (req, res, next) => {
 
       res.status(SUCCESS_CODE).send({ token });
     })
-
-    .catch(next);
+    .catch((error) => {
+      if (error instanceof mongoose.Error.DocumentNotFoundError) {
+        next(new UnauthorizedError('Неправильные почта или пароль'));
+      } else {
+        next(error);
+      }
+    });
 };
 
 // получаем информацию о пользователе
