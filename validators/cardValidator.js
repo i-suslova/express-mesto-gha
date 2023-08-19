@@ -1,4 +1,4 @@
-const { celebrate, Joi } = require('celebrate');
+const { Joi, celebrate } = require('celebrate');
 
 module.exports.createCarddValidator = celebrate({
   body: Joi.object().keys({

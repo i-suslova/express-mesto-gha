@@ -1,20 +1,19 @@
 const router = require('express').Router();
-const users = require('./users');
-const cards = require('./cards');
 
 const { NotFoundError } = require('../errors/indexErrors');
 
-router.use('/users', users);
-router.use('/cards', cards);
+const usersRouter = require('./users');
+const cardsRouter = require('./cards');
+const authRouter = require('./auth');
+
+router.use('/users', usersRouter);
+router.use('/cards', cardsRouter);
+// используем модуль для аутентификации
+router.use('/', authRouter);
 
 // несуществующий путь
-// router.use('/*', (req, res, next) => {
-//   next(new NotFoundError('Страница не найдена'));
-// });
-router.use('*', (req, res, next) => {
-  const err = new NotFoundError('По указанному пути ничего не найдено');
-  next(err);
-  // next(new NotFoundError('Маршрут не найден'));
+router.use('/*', (req, res, next) => {
+  next(new NotFoundError('Страница не найдена'));
 });
 
 module.exports = router;

@@ -35,19 +35,20 @@ module.exports.createCard = (req, res, next) => {
 // удаляем карточку
 module.exports.deleteCard = (req, res, next) => {
   const userId = req.user._id;
-  Card.findById(req.params.cardId)
-    .orFail()
+
+  Card.findById(userId)
     .then((card) => {
       if (!card) {
-        next(new NotFoundError('Карточка не найдена'));
-        // проверяем, что текущий пользователь создал карточку
-      } else if (!card.creator.equals(userId)) {
-        next(new ForbiddenError('У вас нет прав на удаление этой карточки'));
+        throw new NotFoundError('Карточка не найдена');
       }
-      return Card.findByIdAndDelete(req.params.cardId);
+      if (card && card.owner.equals(req.user._id)) {
+        Card.deleteOne(card)
+          .then(() => res.status(SUCCESS_CODE).send(card))
+          .catch(next);
+      } else {
+        throw new ForbiddenError('У Вас нет прав для удаления этой карточки.');
+      }
     })
-
-    .then(() => res.status(SUCCESS_CODE).send({ message: 'Карточка успешно удалена' }))
     .catch(next);
 };
 
@@ -59,8 +60,10 @@ module.exports.likeCard = (req, res, next) => {
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
-    .orFail()
-    .then((card) => res.status(SUCCESS_CODE).send(card))
+    .then((card) => {
+      if (!card) throw new NotFoundError('Такой карточки нет.');
+      res.status(SUCCESS_CODE).send(card);
+    })
     .catch((err) => {
       if (err instanceof mongoose.Error.CastError) {
         next(new BadRequestError('Недопустимый формат данных.'));
@@ -77,8 +80,11 @@ module.exports.dislikeCard = (req, res, next) => {
     // убрать _id из массива
     { $pull: { likes: req.user._id } },
     { new: true },
-  ).orFail()
-    .then((card) => res.status(SUCCESS_CODE).send(card))
+  )
+    .then((card) => {
+      if (!card) throw new NotFoundError('Такой карточки нет.');
+      res.status(SUCCESS_CODE).send(card);
+    })
     .catch((err) => {
       if (err instanceof mongoose.Error.CastError) {
         next(new BadRequestError('Недопустимый формат данных.'));

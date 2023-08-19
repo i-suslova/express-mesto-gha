@@ -1,6 +1,7 @@
-const { celebrate, Joi } = require('celebrate');
+const { Joi, celebrate } = require('celebrate');
 
 module.exports.signupValidator = celebrate({
+
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30).default('Жак-Ив Кусто')
       .messages({
@@ -30,7 +31,6 @@ module.exports.signupValidator = celebrate({
     .messages({
       'string.min': 'Имя должно содержать как минимум 2 символа',
       'string.max': 'Имя не должно превышать 30 символов',
-
     }),
 });
 

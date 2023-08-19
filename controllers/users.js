@@ -19,27 +19,19 @@ module.exports.createUser = (req, res, next) => {
   } = req.body;
 
   bcrypt.hash(password, 10)
-
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
-    .then((user) => res.status(CREATED_CODE).send({
-      ...user.toObject(),
-      // удаляем пароль из данных перед отправкой
-      password: undefined,
-    }))
-
+    .then((user) => {
+      res.status(CREATED_CODE).send({
+        ...user.toObject(),
+        password: undefined,
+      });
+    })
     .catch((err) => {
-      // if (err instanceof mongoose.Error.ValidationError) {
-      //   next(new BadRequestError('Некорректные данные пользователя.'));
-      // } else
       if (err.code === 11000) {
-        // eslint-disable-next-line no-console
-        console.log('ConflictError:', err.message);
         next(new ConflictError('Пользователь с таким email уже существует.'));
       } else {
-        // eslint-disable-next-line no-console
-        console.log('OtherError:', err);
         next(err);
       }
     });
@@ -89,23 +81,13 @@ module.exports.getUserById = (req, res, next) => {
   User.findById(userId)
     .orFail()
     .then((user) => res.status(SUCCESS_CODE).send({ data: user }))
-    // .catch((err) => {
-    //   if (err instanceof mongoose.Error.DocumentNotFoundError) {
-    //     next(new NotFoundError('Пользователь не найден'));
-    //   } else if (err instanceof mongoose.Error.CastError) {
-    //     next(new BadRequestError('Некорректный ID пользователя.'));
-    //   } else {
-    //     next(err);
-    //   }
+
     .catch((err) => {
-      if (err instanceof mongoose.Error.CastError) {
-        next(new BadRequestError('Некорректный ID пользователя.'));
-      } else if (err instanceof mongoose.Error.DocumentNotFoundError) {
+      if (err instanceof mongoose.Error.DocumentNotFoundError) {
         next(new NotFoundError('Пользователь не найден'));
       } else {
         next(err);
       }
-      // });
     });
 };
 
