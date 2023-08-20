@@ -1,5 +1,7 @@
 const { Joi, celebrate } = require('celebrate');
 
+const { urlRegex } = require('../utils/constants');
+
 module.exports.signupValidator = celebrate({
 
   body: Joi.object().keys({
@@ -14,10 +16,10 @@ module.exports.signupValidator = celebrate({
         'string.max': 'Описание не должно превышать 30 символов',
       }),
     avatar: Joi.string()
-      .pattern(/^(https?:\/\/)(www\.)?[a-zA-Z0-9-._~:/?#[\]@!$&'()*+,;=]+#?$/i)
+      .pattern(urlRegex)
       .default('https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png')
       .messages({
-        'string.pattern.base': 'Некорректная ссылка на аватар',
+        'string.pattern.base': 'юзервалид Некорректная ссылка на аватар',
       }),
     email: Joi.string().required().email()
       .messages({
@@ -66,9 +68,9 @@ module.exports.updateUserValidator = celebrate({
 module.exports.avatarValidator = celebrate({
   body: Joi.object().keys({
     avatar: Joi.string()
-      .pattern(/^(https?:\/\/)(www\.)?[a-zA-Z0-9-._~:/?#[\]@!$&'()*+,;=]+#?$/i)
+      .pattern(urlRegex)
       .messages({
-        'string.pattern.base': 'Некорректная ссылка на аватар',
+        'string.pattern.base': 'юзервалид Некорректная ссылка на аватар',
       }),
   }),
 });

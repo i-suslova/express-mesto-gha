@@ -5,15 +5,14 @@ const {
   BadRequestError,
   ForbiddenError,
   NotFoundError,
-} = require('../errors/indexErrors');
+} = require('../utils/errors/indexErrors');
 
-const SUCCESS_CODE = 200;
 const CREATED_CODE = 201;
 
 // получаем список карточек
 module.exports.getAllCards = (req, res, next) => {
   Card.find({})
-    .then((cards) => res.status(SUCCESS_CODE).send(cards))
+    .then((cards) => res.send(cards))
     .catch(next);
 };
 
@@ -23,8 +22,9 @@ module.exports.createCard = (req, res, next) => {
 
   Card.create({ name, link, owner: req.user._id })
     .then((card) => res.status(CREATED_CODE).send(card))
+
     .catch((err) => {
-      if (err instanceof mongoose.Error.ValidationError) {
+      if (err.name === 'ValidationError') {
         next(new BadRequestError('Некорректные данные карточки.'));
       } else {
         next(err);
@@ -42,7 +42,7 @@ module.exports.deleteCard = (req, res, next) => {
     .then((card) => {
       if (card && card.owner.equals(userId)) {
         return Card.deleteOne({ _id: cardId })
-          .then(() => res.status(SUCCESS_CODE).send({ message: 'Карточка успешно удалена' }))
+          .then(() => res.send({ message: 'Карточка успешно удалена' }))
           .catch(next);
       }
       throw new ForbiddenError('У Вас нет прав для удаления этой карточки.');
@@ -60,7 +60,7 @@ module.exports.likeCard = (req, res, next) => {
   )
     .then((card) => {
       if (!card) throw new NotFoundError('Такой карточки нет.');
-      res.status(SUCCESS_CODE).send(card);
+      res.send(card);
     })
     .catch((err) => {
       if (err instanceof mongoose.Error.CastError) {
@@ -81,7 +81,7 @@ module.exports.dislikeCard = (req, res, next) => {
   )
     .then((card) => {
       if (!card) throw new NotFoundError('Такой карточки нет.');
-      res.status(SUCCESS_CODE).send(card);
+      res.send(card);
     })
     .catch((err) => {
       if (err instanceof mongoose.Error.CastError) {

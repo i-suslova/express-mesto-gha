@@ -1,5 +1,7 @@
 const { Joi, celebrate } = require('celebrate');
 
+const { urlRegex } = require('../utils/constants');
+
 module.exports.createCarddValidator = celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30).required()
@@ -9,9 +11,9 @@ module.exports.createCarddValidator = celebrate({
         'any.required': 'Название обязательно',
       }),
     link: Joi.string().required()
-      .pattern(/^(https?:\/\/)(www\.)?[a-zA-Z0-9-._~:/?#[\]@!$&'()*+,;=]+#?$/i)
+      .pattern(urlRegex)
       .messages({
-        'string.pattern.base': 'Некорректная ссылка',
+        'string.pattern.base': 'картавалид Некорректная ссылка',
         'any.required': 'Ссылка обязательна',
       }),
   }),

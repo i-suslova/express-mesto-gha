@@ -4,13 +4,8 @@
     "no-underscore-dangle": [
       "error",
       {
-        "allowAfterThis": true,
-        "allowAfterThisConstructor": true,
-        "allowFunctionParams": true,
         "allow": ["_id"]
       }
-    ],
-    "linebreak-style": "off",
-    "func-names": ["error", "never"]
+    ]
   }
 }
