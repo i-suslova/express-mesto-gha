@@ -15,7 +15,7 @@ const cardSchema = new mongoose.Schema(
       required: true,
       validate: {
         validator: (v) => urlRegex.test(v),
-        message: 'картамодель Некорректная ссылка',
+        message: 'Некорректная ссылка',
       },
     },
     owner: {

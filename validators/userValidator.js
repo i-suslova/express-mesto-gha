@@ -19,7 +19,7 @@ module.exports.signupValidator = celebrate({
       .pattern(urlRegex)
       .default('https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png')
       .messages({
-        'string.pattern.base': 'юзервалид Некорректная ссылка на аватар',
+        'string.pattern.base': 'Некорректная ссылка на аватар',
       }),
     email: Joi.string().required().email()
       .messages({
@@ -70,7 +70,7 @@ module.exports.avatarValidator = celebrate({
     avatar: Joi.string()
       .pattern(urlRegex)
       .messages({
-        'string.pattern.base': 'юзервалид Некорректная ссылка на аватар',
+        'string.pattern.base': 'Некорректная ссылка на аватар',
       }),
   }),
 });

@@ -13,7 +13,7 @@ module.exports.createCarddValidator = celebrate({
     link: Joi.string().required()
       .pattern(urlRegex)
       .messages({
-        'string.pattern.base': 'картавалид Некорректная ссылка',
+        'string.pattern.base': 'Некорректная ссылка',
         'any.required': 'Ссылка обязательна',
       }),
   }),
